@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+ai-model/venv/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# VS Code
+.vscode/
+
+# Eclipse / STS
+.metadata/
+.project
+.classpath
+.settings/
+
+# Gradle
+.gradle/
+build/
+bin/
+
+# OS
+.DS_Store
+Thumbs.db
