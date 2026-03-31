@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find /d/workspace/GitHub/Eco_Link/backend-spring -type f -name \"*.java\" -exec grep -l \"^@\" {})"
+    ]
+  }
+}
