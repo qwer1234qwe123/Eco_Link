@@ -9,11 +9,8 @@ ai-model/venv/
 # VS Code
 .vscode/
 
-# Eclipse / STS
+# Eclipse / STS ← 아래 3줄 삭제!
 .metadata/
-.project
-.classpath
-.settings/
 
 # Gradle
 .gradle/
