@@ -188,3 +188,32 @@
     // 초기 로드 + 30초 자동 갱신
     loadData();
     setInterval(loadData, 30000);
+
+    // ───── 모바일 햄버거 메뉴 ─────
+    const dashHamburger = document.getElementById('dashHamburger');
+    const sideNav = document.querySelector('nav.side-nav');
+
+    function initMobileNav() {
+      if (window.innerWidth <= 768) {
+        dashHamburger.style.display = 'flex';
+      } else {
+        dashHamburger.style.display = 'none';
+        sideNav.classList.remove('open');
+        dashHamburger.classList.remove('open');
+      }
+    }
+
+    dashHamburger.addEventListener('click', () => {
+      dashHamburger.classList.toggle('open');
+      sideNav.classList.toggle('open');
+    });
+
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.addEventListener('click', () => {
+        sideNav.classList.remove('open');
+        dashHamburger.classList.remove('open');
+      });
+    });
+
+    initMobileNav();
+    window.addEventListener('resize', initMobileNav);

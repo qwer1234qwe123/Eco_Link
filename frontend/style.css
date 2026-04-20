@@ -270,18 +270,142 @@
     footer .logo span { color: var(--green-light); }
     footer p { color: rgba(255,255,255,0.3); font-size: 13px; }
 
-    /* RESPONSIVE */
-    @media (max-width: 900px) {
-      nav { padding: 16px 24px; }
+    /* ── 햄버거 버튼 (기본 숨김) ── */
+    .nav-hamburger {
+      display: none; flex-direction: column; gap: 5px;
+      cursor: pointer; padding: 4px; background: none; border: none;
+    }
+    .nav-hamburger span {
+      display: block; width: 24px; height: 2px;
+      background: var(--green-dark); border-radius: 2px;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+    .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* ── 모바일 드롭다운 메뉴 ── */
+    .nav-mobile-menu {
+      display: none; position: fixed;
+      top: 65px; left: 0; right: 0;
+      background: rgba(245,242,236,0.97);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      padding: 16px 24px 24px; z-index: 99;
+      flex-direction: column; gap: 4px;
+    }
+    .nav-mobile-menu.open { display: flex; }
+    .nav-mobile-menu a {
+      text-decoration: none; color: var(--gray);
+      font-size: 15px; font-weight: 500;
+      padding: 12px 0; border-bottom: 1px solid rgba(0,0,0,0.05);
+      transition: color 0.2s;
+    }
+    .nav-mobile-menu a:last-child { border-bottom: none; margin-top: 8px; }
+    .nav-mobile-menu a:hover { color: var(--green-dark); }
+    .nav-mobile-menu .nav-cta {
+      display: block; text-align: center; margin-top: 4px;
+      padding: 12px 22px; background: var(--green-dark);
+      color: var(--white) !important; border-radius: 8px;
+      font-weight: 700 !important;
+    }
+
+    /* ── 태블릿 (≤1024px) ── */
+    @media (max-width: 1024px) {
+      nav { padding: 18px 32px; }
+      #hero { padding: 130px 40px 80px; }
+      #stats { padding: 40px 40px; gap: 24px; }
+      #intro, #team { padding: 100px 40px; }
+      #flow { padding: 100px 40px; }
+      #tech { padding: 70px 40px; }
+      #cta { padding: 100px 40px; }
+      footer { padding: 40px 40px; }
+      .team-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+
+    /* ── 모바일 (≤768px) ── */
+    @media (max-width: 768px) {
+      /* NAV */
+      nav { padding: 16px 20px; }
       nav ul { display: none; }
-      #hero { padding: 120px 24px 60px; }
-      #stats { grid-template-columns: repeat(2, 1fr); padding: 40px 24px; }
-      #intro, #team { padding: 80px 24px; }
+      .nav-hamburger { display: flex; }
+
+      /* HERO */
+      #hero {
+        padding: 100px 20px 60px;
+        min-height: 100svh;
+        align-items: flex-start;
+      }
+      #hero h1 { font-size: clamp(2rem, 8vw, 2.8rem); }
+      #hero p { font-size: 15px; max-width: 100%; }
+      .hero-buttons { flex-direction: column; align-items: stretch; gap: 12px; }
+      .btn-primary, .btn-secondary {
+        text-align: center; padding: 14px 24px; font-size: 14px;
+      }
+
+      /* STATS */
+      #stats {
+        grid-template-columns: repeat(2, 1fr);
+        padding: 32px 20px; gap: 24px;
+      }
+      .stat-num { font-size: 1.8rem; }
+
+      /* INTRO */
+      #intro { padding: 72px 20px; }
+      #intro h2 { font-size: 1.8rem; }
+      #intro > p { font-size: 15px; margin-bottom: 40px; }
       .intro-grid { grid-template-columns: 1fr; }
-      .flow-steps { grid-template-columns: 1fr 1fr; gap: 32px; }
+      .intro-card { padding: 28px 24px; }
+
+      /* FLOW */
+      #flow { padding: 72px 20px; }
+      #flow h2 { font-size: 1.8rem; margin-bottom: 48px; }
+      #flow::before { display: none; }
+      .flow-steps {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
       .flow-steps::before { display: none; }
-      .team-grid { grid-template-columns: repeat(2, 1fr); }
-      #flow { padding: 80px 24px; }
-      #cta { padding: 80px 24px; }
-      footer { flex-direction: column; gap: 12px; padding: 32px 24px; text-align: center; }
+      .flow-step {
+        display: flex; align-items: flex-start; gap: 20px;
+        text-align: left; padding: 20px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.07);
+      }
+      .flow-step:last-child { border-bottom: none; }
+      .flow-num {
+        width: 52px; height: 52px; font-size: 18px;
+        flex-shrink: 0; margin: 0;
+      }
+      .flow-step-text { flex: 1; padding-top: 4px; }
+      .flow-step h4 { margin-bottom: 4px; font-size: 14px; }
+      .flow-step p { font-size: 12px; }
+
+      /* TEAM */
+      #team { padding: 72px 20px; }
+      #team h2 { font-size: 1.8rem; margin-bottom: 36px; }
+      .team-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .team-card { padding: 22px 16px; }
+
+      /* TECH */
+      #tech { padding: 56px 20px; }
+      .tech-tag { padding: 8px 14px; font-size: 12px; }
+
+      /* CTA */
+      #cta { padding: 72px 20px; }
+      #cta h2 { font-size: 1.8rem; }
+      #cta p { font-size: 14px; }
+      .btn-neon { padding: 15px 36px; font-size: 14px; display: block; }
+
+      /* FOOTER */
+      footer {
+        flex-direction: column; gap: 10px;
+        padding: 28px 20px; text-align: center;
+      }
+    }
+
+    /* ── 소형 모바일 (≤400px) ── */
+    @media (max-width: 400px) {
+      #hero h1 { font-size: 1.9rem; }
+      .team-grid { grid-template-columns: 1fr; }
+      #stats { grid-template-columns: repeat(2, 1fr); gap: 16px; }
     }

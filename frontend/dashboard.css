@@ -255,3 +255,111 @@
       animation: spin 0.8s linear infinite;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ══════════════════════════════════════
+       반응형 — 대시보드
+    ══════════════════════════════════════ */
+
+    /* ── 태블릿 (≤1100px) ── */
+    @media (max-width: 1100px) {
+      aside { width: 200px; }
+      main { margin-left: 200px; }
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .dashboard-grid { grid-template-columns: 1fr; }
+      .bottom-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── 모바일 (≤768px): 사이드바 → 상단 바 전환 ── */
+    @media (max-width: 768px) {
+      /* 사이드바 숨기고 상단으로 */
+      aside {
+        width: 100%; min-height: auto;
+        position: fixed; top: 0; left: 0; right: 0; bottom: auto;
+        border-right: none; border-bottom: 1px solid var(--border);
+        flex-direction: row; align-items: center; z-index: 200;
+      }
+      .sidebar-logo {
+        padding: 14px 20px; border-bottom: none;
+        border-right: 1px solid var(--border);
+        flex-shrink: 0;
+      }
+      .sidebar-logo h1 { font-size: 17px; }
+      .sidebar-logo small { display: none; }
+
+      /* 사이드 네비 — 모바일에서 드롭다운으로 */
+      nav.side-nav {
+        display: none; padding: 0;
+        position: fixed; top: 53px; left: 0; right: 0;
+        background: var(--sidebar-bg); border-bottom: 1px solid var(--border);
+        z-index: 199; padding: 12px;
+      }
+      nav.side-nav.open { display: block; }
+      .nav-group-label { margin: 12px 0 4px; }
+      .nav-item { padding: 10px 14px; }
+
+      /* 모바일 햄버거 */
+      .dash-hamburger {
+        display: flex; flex-direction: column; gap: 5px;
+        cursor: pointer; padding: 4px 8px;
+        background: none; border: none; margin-left: 16px;
+      }
+      .dash-hamburger span {
+        display: block; width: 22px; height: 2px;
+        background: var(--text); border-radius: 2px;
+        transition: transform 0.3s, opacity 0.3s;
+      }
+      .dash-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+      .dash-hamburger.open span:nth-child(2) { opacity: 0; }
+      .dash-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+      .sidebar-footer { display: none; }
+
+      /* 메인 컨텐츠 위치 조정 */
+      main { margin-left: 0; margin-top: 53px; }
+
+      /* 상단바 */
+      .topbar { padding: 14px 16px; }
+      .topbar-left h2 { font-size: 15px; }
+      .topbar-left p { font-size: 12px; }
+      .topbar-right .time { display: none; }
+      .btn-refresh { padding: 7px 14px; font-size: 12px; }
+
+      /* 컨텐츠 패딩 */
+      .content { padding: 16px; }
+
+      /* 통계 카드 2열 */
+      .stats-row { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+      .stat-card { padding: 16px 14px; }
+      .stat-card-value { font-size: 1.6rem; }
+
+      /* 대시보드 그리드 단일 열 */
+      .dashboard-grid { grid-template-columns: 1fr; gap: 12px; }
+      .bottom-grid { grid-template-columns: 1fr; gap: 12px; margin-top: 12px; }
+
+      /* 테이블 가로 스크롤 */
+      #can-table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .can-table { min-width: 560px; }
+      .can-table th, .can-table td { padding: 12px 16px; }
+
+      /* 패널 헤더 */
+      .panel-header { padding: 14px 16px; }
+      .panel-header h3 { font-size: 13px; }
+
+      /* 예측 패널 */
+      .pred-item { padding: 14px 16px; gap: 10px; }
+      .pred-icon { width: 30px; height: 30px; font-size: 14px; }
+
+      /* 로그 */
+      .log-item { padding: 10px 16px; }
+      .log-text { font-size: 12px; }
+
+      /* 분포 차트 */
+      .chart-area { padding: 16px; }
+    }
+
+    /* ── 소형 모바일 (≤400px) ── */
+    @media (max-width: 400px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .stat-card-value { font-size: 1.4rem; }
+      .stat-card-label { font-size: 11px; }
+    }

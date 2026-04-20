@@ -2,8 +2,27 @@
     document.querySelectorAll('a[href^="#"]').forEach(a => {
       a.addEventListener('click', e => {
         e.preventDefault();
+        closeMobileMenu();
         document.querySelector(a.getAttribute('href'))?.scrollIntoView({ behavior: 'smooth' });
       });
+    });
+
+    // 햄버거 메뉴
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+
+    function closeMobileMenu() {
+      hamburger.classList.remove('open');
+      mobileMenu.classList.remove('open');
+    }
+
+    hamburger.addEventListener('click', () => {
+      hamburger.classList.toggle('open');
+      mobileMenu.classList.toggle('open');
+    });
+
+    document.querySelectorAll('.mobile-link').forEach(a => {
+      a.addEventListener('click', closeMobileMenu);
     });
 
     // 스크롤 등장 애니메이션
