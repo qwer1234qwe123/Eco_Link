@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BinGo — AI 기반 스마트 폐기물 수거 시스템 by EcoLink</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <nav>
+    <div class="nav-logo">Bin<span>Go</span> <small style="font-size:13px;font-weight:400;color:var(--gray)">by EcoLink</small></div>
+    <ul>
+      <li><a href="#intro">시스템 소개</a></li>
+      <li><a href="#flow">작동 방식</a></li>
+      <li><a href="#team">팀원</a></li>
+      <li><a href="dashboard.html" class="nav-cta">대시보드 →</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <section id="hero">
+    <div class="hero-bg"></div>
+    <div class="hero-grid"></div>
+    <div class="hero-content">
+      <div class="hero-badge">실시간 모니터링 운영 중</div>
+      <h1>도시의 쓰레기통이<br><em>스스로 말합니다</em></h1>
+      <p>EcoLink 팀이 만든 <strong>BinGo</strong>는 초음파 센서로 적재율을 실시간 수집하고,<br>AI가 포화 시점을 예측해 최적의 수거 경로를 안내합니다.</p>
+      <div class="hero-buttons">
+        <a href="dashboard.html" class="btn-primary">대시보드 바로가기 →</a>
+        <a href="#intro" class="btn-secondary">시스템 소개</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- STATS -->
+  <div id="stats">
+    <div class="stat-item">
+      <span class="stat-num">24</span>
+      <div class="stat-label">모니터링 쓰레기통</div>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">98.2%</span>
+      <div class="stat-label">센서 가동률</div>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">AI 예측</span>
+      <div class="stat-label">포화 시점 분석</div>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">실시간</span>
+      <div class="stat-label">데이터 수집</div>
+    </div>
+  </div>
+
+  <!-- INTRO -->
+  <section id="intro">
+    <span class="section-tag">About BinGo</span>
+    <h2>스마트 도시를 위한<br>폐기물 관리 솔루션</h2>
+    <p>BinGo는 EcoLink 팀이 개발한 IoT 센서, 백엔드 서버, AI 예측 모델, 웹 대시보드가 연결된 통합 폐기물 관리 시스템입니다. 불필요한 순찰을 없애고, 꼭 필요한 곳에 수거 자원을 집중합니다.</p>
+    <div class="intro-grid">
+      <div class="intro-card">
+        <span class="intro-icon">📡</span>
+        <h3>실시간 적재율 감지</h3>
+        <p>아두이노 + 초음파 센서가 일정 주기로 쓰레기통 내부를 측정하고, Wi-Fi를 통해 서버로 데이터를 전송합니다.</p>
+      </div>
+      <div class="intro-card">
+        <span class="intro-icon">🤖</span>
+        <h3>AI 포화 시점 예측</h3>
+        <p>PyTorch 기반 모델이 누적 패턴을 학습해 오후 6시 이전 임계치 도달 여부를 자동으로 판단합니다.</p>
+      </div>
+      <div class="intro-card">
+        <span class="intro-icon">🗺️</span>
+        <h3>최적 수거 경로 안내</h3>
+        <p>수거 대상 쓰레기통을 자동 선별하고, 효율적인 방문 순서와 경로를 지도 위에 시각화합니다.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FLOW -->
+  <section id="flow">
+    <div style="max-width:1200px; margin:0 auto;">
+      <span class="section-tag">시스템 흐름</span>
+      <h2>5단계로 완성되는<br>스마트 수거 사이클</h2>
+      <div class="flow-steps">
+        <div class="flow-step">
+          <div class="flow-num">1</div>
+          <h4>센서 측정</h4>
+          <p>초음파 센서로<br>적재율 측정</p>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">2</div>
+          <h4>데이터 전송</h4>
+          <p>Wi-Fi로<br>서버 API 전송</p>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">3</div>
+          <h4>DB 저장</h4>
+          <p>MariaDB에<br>로그 누적 저장</p>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">4</div>
+          <h4>AI 예측</h4>
+          <p>포화 시점<br>및 수거 대상 선별</p>
+        </div>
+        <div class="flow-step">
+          <div class="flow-num">5</div>
+          <h4>웹 시각화</h4>
+          <p>대시보드에서<br>현황 · 경로 표시</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TEAM -->
+  <section id="team">
+    <span class="section-tag">Team</span>
+    <h2>EcoLink 팀</h2>
+    <div class="team-grid">
+      <div class="team-card">
+        <div class="team-avatar">🖥️</div>
+        <span class="team-role">Front-End</span>
+        <h4>이서준</h4>
+        <p>웹 UI 구성<br>상태 시각화<br>경로 표시</p>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar">⚙️</div>
+        <span class="team-role">Back-End</span>
+        <h4>강대웅</h4>
+        <p>센서 수신 API<br>프론트 연동<br>서버 기능 구현</p>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar">🗄️</div>
+        <span class="team-role">Back-End / DB</span>
+        <h4>허찬</h4>
+        <p>DB 설계 · 연동<br>테이블 관리<br>유지보수</p>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar">🤖</div>
+        <span class="team-role">AI</span>
+        <h4>전영준</h4>
+        <p>예측 모델 개발<br>데이터 전처리<br>API 연동</p>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar">📡</div>
+        <span class="team-role">IoT</span>
+        <h4>박승국</h4>
+        <p>센서 배선 · 설치<br>데이터 수집<br>현장 테스트</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- TECH -->
+  <div id="tech">
+    <h3>기술 스택</h3>
+    <div class="tech-list">
+      <span class="tech-tag">HTML / CSS / JS</span>
+      <span class="tech-tag">AJAX</span>
+      <span class="tech-tag">Java</span>
+      <span class="tech-tag">Spring Boot</span>
+      <span class="tech-tag">MariaDB</span>
+      <span class="tech-tag">Python</span>
+      <span class="tech-tag">PyTorch</span>
+      <span class="tech-tag">FastAPI</span>
+      <span class="tech-tag">Arduino (ESP32)</span>
+      <span class="tech-tag">Ultrasonic Sensor</span>
+      <span class="tech-tag">Ubuntu Server</span>
+      <span class="tech-tag">GitHub</span>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <section id="cta">
+    <h2>지금 바로 현황을 확인하세요</h2>
+    <p>BinGo 실시간 적재율, AI 예측 결과, 수거 경로를 대시보드에서 한눈에</p>
+    <a href="dashboard.html" class="btn-neon">관리자 대시보드 →</a>
+  </section>
+
+  <footer>
+    <div class="logo">Bin<span>Go</span></div>
+    <p>© 2025 EcoLink Team — 융합프로젝트</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
