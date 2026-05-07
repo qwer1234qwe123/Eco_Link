@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BinGo — 관리자 대시보드 | EcoLink</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+  <!-- SIDEBAR -->
+  <aside>
+    <div class="sidebar-logo">
+      <h1>Bin<span>Go</span></h1>
+      <small>by EcoLink — 관리자 대시보드</small>
+    </div>
+    <button class="dash-hamburger" id="dashHamburger" aria-label="메뉴" style="display:none">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="side-nav">
+      <div class="nav-group-label">모니터링</div>
+      <a class="nav-item active" href="#">
+        <span class="icon">📊</span> 대시보드
+      </a>
+      <a class="nav-item" href="#">
+        <span class="icon">🗑️</span> 쓰레기통 목록
+      </a>
+      <a class="nav-item" href="#">
+        <span class="icon">📡</span> 센서 로그
+      </a>
+
+      <div class="nav-group-label">AI / 예측</div>
+      <a class="nav-item" href="#">
+        <span class="icon">🤖</span> 예측 결과
+      </a>
+      <a class="nav-item" href="#">
+        <span class="icon">📈</span> 적재율 추이
+      </a>
+
+      <div class="nav-group-label">수거 관리</div>
+      <a class="nav-item" href="#">
+        <span class="icon">🗺️</span> 수거 경로
+      </a>
+      <a class="nav-item" href="#">
+        <span class="icon">📋</span> 수거 기록
+      </a>
+      <a class="nav-item" href="#">
+        <span class="icon">👷</span> 작업자 관리
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="index.html">← 소개 페이지로</a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main>
+    <div class="topbar">
+      <div class="topbar-left">
+        <h2>BinGo 대시보드 <span class="live-badge"><span class="live-dot"></span>LIVE</span></h2>
+        <p>쓰레기통 실시간 적재율 및 AI 예측 현황</p>
+      </div>
+      <div class="topbar-right">
+        <span class="time" id="clock">--:--:--</span>
+        <button class="btn-refresh" onclick="loadData()">↻ 새로고침</button>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- STATS -->
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <span class="stat-card-label">전체 쓰레기통</span>
+            <span class="stat-card-icon">🗑️</span>
+          </div>
+          <div class="stat-card-value v-green" id="stat-total">—</div>
+          <div class="stat-card-sub">모니터링 중</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <span class="stat-card-label">수거 필요</span>
+            <span class="stat-card-icon">🚨</span>
+          </div>
+          <div class="stat-card-value v-red" id="stat-full">—</div>
+          <div class="stat-card-sub">80% 이상 적재</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <span class="stat-card-label">AI 예측 대상</span>
+            <span class="stat-card-icon">🤖</span>
+          </div>
+          <div class="stat-card-value v-yellow" id="stat-pred">—</div>
+          <div class="stat-card-sub">오후 6시 전 포화 예상</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <span class="stat-card-label">오늘 수거 완료</span>
+            <span class="stat-card-icon">✅</span>
+          </div>
+          <div class="stat-card-value v-blue" id="stat-done">—</div>
+          <div class="stat-card-sub">비움 처리 완료</div>
+        </div>
+      </div>
+
+      <!-- MAIN GRID -->
+      <div class="dashboard-grid">
+        <!-- 쓰레기통 테이블 -->
+        <div class="panel">
+          <div class="panel-header">
+            <h3>쓰레기통 현황</h3>
+            <span id="last-updated">업데이트 중...</span>
+          </div>
+          <div id="can-table-wrap">
+            <div class="loading"><div class="spinner"></div> 데이터 불러오는 중...</div>
+          </div>
+        </div>
+
+        <!-- 예측 패널 -->
+        <div class="panel">
+          <div class="panel-header">
+            <h3>AI 예측 결과</h3>
+            <span>오늘 기준</span>
+          </div>
+          <div class="pred-list" id="pred-list">
+            <div class="loading"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOTTOM -->
+      <div class="bottom-grid">
+        <!-- 최근 로그 -->
+        <div class="panel">
+          <div class="panel-header">
+            <h3>최근 센서 로그</h3>
+            <span>최근 10건</span>
+          </div>
+          <div class="log-list" id="log-list">
+            <div class="loading"><div class="spinner"></div></div>
+          </div>
+        </div>
+
+        <!-- 간단 통계 -->
+        <div class="panel">
+          <div class="panel-header">
+            <h3>적재율 분포</h3>
+            <span>현재 기준</span>
+          </div>
+          <div class="chart-area" id="dist-chart">
+            <div class="loading"><div class="spinner"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="dashboard.js"></script>
+</body>
+</html>

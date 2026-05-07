@@ -409,30 +409,3 @@
       .team-grid { grid-template-columns: 1fr; }
       #stats { grid-template-columns: repeat(2, 1fr); gap: 16px; }
     }
-    /* style.css */
-.hero {
-  display: flex;
-  align-items: center;
-  gap: 2rem;
-  padding: 4rem 5%;
-  min-height: 100vh;
-}
-
-.hero-text {
-  flex: 1;
-}
-
-.hero-visual {
-  flex: 1;
-  max-width: 50%;
-}
-
-/* 모바일 대응 */
-@media (max-width: 768px) {
-  .hero {
-    flex-direction: column;
-  }
-  .hero-visual {
-    max-width: 100%;
-  }
-}
