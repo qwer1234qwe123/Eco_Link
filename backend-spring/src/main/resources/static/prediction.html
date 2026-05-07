@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 예측 결과 | EcoLink BinGo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard.css">
+  <style>
+    :root { --accent: #2ea86a; }
+
+    .pred-summary-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .pred-summary-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .pred-summary-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+
+    .pred-summary-card.danger::before { background: #ef4444; }
+    .pred-summary-card.warn::before   { background: #f59e0b; }
+    .pred-summary-card.safe::before   { background: #2ea86a; }
+
+    .pred-summary-label { font-size: 12px; color: var(--text-muted); }
+
+    .pred-summary-value {
+      font-size: 36px;
+      font-weight: 700;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .pred-summary-card.danger .pred-summary-value { color: #ef4444; }
+    .pred-summary-card.warn   .pred-summary-value { color: #f59e0b; }
+    .pred-summary-card.safe   .pred-summary-value { color: #2ea86a; }
+
+    .pred-summary-desc { font-size: 12px; color: var(--text-muted); }
+
+    .filter-tabs { display: flex; gap: 8px; margin-bottom: 20px; }
+
+    .filter-tab {
+      padding: 7px 18px;
+      border-radius: 100px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+
+    .filter-tab:hover { border-color: var(--accent); color: var(--text); }
+    .filter-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    .pred-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    .pred-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      animation: fadeInUp 0.4s ease both;
+    }
+
+    .pred-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+
+    .pred-card.danger { border-left: 3px solid #ef4444; }
+    .pred-card.warn   { border-left: 3px solid #f59e0b; }
+    .pred-card.safe   { border-left: 3px solid #2ea86a; }
+
+    .pred-card-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .pred-card-id {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .pred-card-badge {
+      padding: 4px 12px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .badge-danger { background: rgba(239,68,68,0.15); color: #ef4444; }
+    .badge-warn   { background: rgba(245,158,11,0.15); color: #f59e0b; }
+    .badge-safe   { background: rgba(46,168,106,0.15); color: #2ea86a; }
+
+    .pred-card-status { font-size: 16px; font-weight: 600; color: var(--text); }
+    .pred-card-detail { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+    .confidence-wrap { display: flex; flex-direction: column; gap: 6px; }
+
+    .confidence-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .confidence-val { font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+
+    .confidence-bar-bg {
+      height: 6px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+
+    .confidence-bar { height: 100%; border-radius: 100px; transition: width 0.8s ease; }
+
+    .pred-card-time {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+      padding-top: 4px;
+      border-top: 1px solid var(--border);
+    }
+
+    .pred-empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    .pred-empty-icon { font-size: 48px; margin-bottom: 16px; }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .pred-card:nth-child(1) { animation-delay: 0.05s; }
+    .pred-card:nth-child(2) { animation-delay: 0.10s; }
+    .pred-card:nth-child(3) { animation-delay: 0.15s; }
+    .pred-card:nth-child(4) { animation-delay: 0.20s; }
+    .pred-card:nth-child(5) { animation-delay: 0.25s; }
+    .pred-card:nth-child(6) { animation-delay: 0.30s; }
+
+    .btn-refresh-pred {
+      padding: 8px 20px;
+      border-radius: 8px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+
+    .btn-refresh-pred:hover { opacity: 0.85; }
+
+    .last-pred-time {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    @media (max-width: 768px) {
+      .pred-summary-row { grid-template-columns: 1fr; }
+      .pred-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <aside>
+    <div class="sidebar-logo">
+      <h1>Bin<span>Go</span></h1>
+      <small>by EcoLink — 관리자 대시보드</small>
+    </div>
+    <button class="dash-hamburger" id="dashHamburger" aria-label="메뉴" style="display:none">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="side-nav">
+      <div class="nav-group-label">모니터링</div>
+      <a class="nav-item" href="dashboard.html">
+        <span class="icon">📊</span> 대시보드
+      </a>
+      <a class="nav-item" href="#">
+        <span class="icon">🗑️</span> 쓰레기통 목록
+      </a>
+      <a class="nav-item" href="#">
+        <span class="icon">📡</span> 센서 로그
+      </a>
+      <div class="nav-group-label">AI / 예측</div>
+      <a class="nav-item active" href="prediction.html">
+        <span class="icon">🤖</span> 예측 결과
+      </a>
+      <a class="nav-item" href="#">
+        <span class="icon">📈</span> 적재율 추이
+      </a>
+      <div class="nav-group-label">수거 관리</div>
+      <a class="nav-item" href="#">
+        <span class="icon">🗺️</span> 수거 경로
+      </a>
+      <a class="nav-item" href="#">
+        <span class="icon">📋</span> 수거 기록
+      </a>
+      <a class="nav-item" href="#">
+        <span class="icon">👷</span> 작업자 관리
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="index.html">← 소개 페이지로</a>
+    </div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <div class="topbar-left">
+        <h2>AI 예측 결과 <span class="live-badge"><span class="live-dot"></span>LIVE</span></h2>
+        <p>오늘 오후 6시 이전 포화 예상 쓰레기통 분석</p>
+      </div>
+      <div class="topbar-right">
+        <span class="time" id="clock">--:--:--</span>
+        <button class="btn-refresh-pred" onclick="loadPredictions()">↻ 새로고침</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <div class="pred-summary-row">
+        <div class="pred-summary-card danger">
+          <div class="pred-summary-label">🔴 즉시 수거 필요</div>
+          <div class="pred-summary-value" id="sum-danger">—</div>
+          <div class="pred-summary-desc">현재 80% 이상 적재</div>
+        </div>
+        <div class="pred-summary-card warn">
+          <div class="pred-summary-label">🟡 오늘 수거 권장</div>
+          <div class="pred-summary-value" id="sum-warn">—</div>
+          <div class="pred-summary-desc">오후 6시 전 포화 예상</div>
+        </div>
+        <div class="pred-summary-card safe">
+          <div class="pred-summary-label">🟢 정상</div>
+          <div class="pred-summary-value" id="sum-safe">—</div>
+          <div class="pred-summary-desc">수거 불필요</div>
+        </div>
+      </div>
+
+      <div class="filter-tabs">
+        <button class="filter-tab active" onclick="filterCards('all', this)">전체</button>
+        <button class="filter-tab" onclick="filterCards('danger', this)">🔴 수거 필요</button>
+        <button class="filter-tab" onclick="filterCards('warn', this)">🟡 주의</button>
+        <button class="filter-tab" onclick="filterCards('safe', this)">🟢 정상</button>
+      </div>
+
+      <div style="display:flex;justify-content:flex-end;margin-bottom:16px">
+        <span class="last-pred-time" id="last-pred-time">업데이트 중...</span>
+      </div>
+
+      <div class="pred-grid" id="pred-grid">
+        <div class="pred-empty">
+          <div class="pred-empty-icon">🤖</div>
+          <div>예측 데이터를 불러오는 중입니다...</div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    function updateClock() {
+      const now = new Date();
+      document.getElementById('clock').textContent =
+        now.toLocaleTimeString('ko-KR', { hour12: false });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    function filterCards(type, btn) {
+      document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      document.querySelectorAll('.pred-card').forEach(card => {
+        card.style.display = (type === 'all' || card.dataset.type === type) ? '' : 'none';
+      });
+    }
+
+    function renderCards(data) {
+      const grid = document.getElementById('pred-grid');
+
+      if (!data || data.length === 0) {
+        grid.innerHTML = `
+          <div class="pred-empty">
+            <div class="pred-empty-icon">🟢</div>
+            <div>모든 쓰레기통이 정상입니다!</div>
+          </div>`;
+        return;
+      }
+
+      const sorted = [...data].sort((a, b) => {
+        const order = { danger: 0, warn: 1, safe: 2 };
+        return order[a.type] - order[b.type];
+      });
+
+      grid.innerHTML = sorted.map((item, i) => `
+        <div class="pred-card ${item.type}" data-type="${item.type}" style="animation-delay:${i * 0.05}s">
+          <div class="pred-card-top">
+            <span class="pred-card-id">CAN #${item.canId} · ${item.locName}</span>
+            <span class="pred-card-badge badge-${item.type}">
+              ${item.type === 'danger' ? '🔴 즉시 수거' : item.type === 'warn' ? '🟡 수거 권장' : '🟢 정상'}
+            </span>
+          </div>
+          <div class="pred-card-status">${item.status}</div>
+          <div class="pred-card-detail">${item.detail}</div>
+          <div class="confidence-wrap">
+            <div class="confidence-label">
+              <span>AI 신뢰도</span>
+              <span class="confidence-val">${item.confidence}%</span>
+            </div>
+            <div class="confidence-bar-bg">
+              <div class="confidence-bar" style="width:${item.confidence}%;background:${
+                item.type === 'danger' ? '#ef4444' : item.type === 'warn' ? '#f59e0b' : '#2ea86a'
+              }"></div>
+            </div>
+          </div>
+          <div class="pred-card-time">예측 생성: ${item.time}</div>
+        </div>
+      `).join('');
+
+      document.getElementById('sum-danger').textContent = data.filter(d => d.type === 'danger').length;
+      document.getElementById('sum-warn').textContent   = data.filter(d => d.type === 'warn').length;
+      document.getElementById('sum-safe').textContent   = data.filter(d => d.type === 'safe').length;
+    }
+
+    async function loadPredictions() {
+      document.getElementById('last-pred-time').textContent = '업데이트 중...';
+
+      try {
+        const res = await fetch('/api/prediction/all');
+        if (!res.ok) throw new Error('API 오류');
+
+        const data = await res.json();
+        const cards = data.map(p => ({
+          canId: p.can_id,                    // ← snake_case로 수정
+          locName: p.loc_name || '',
+          type: p.needs_collection ? 'danger' : 'safe',  // ← snake_case로 수정
+          status: p.predicted_status,         // ← snake_case로 수정
+          detail: p.message,
+          confidence: Math.round(p.confidence * 100),
+          time: new Date().toLocaleTimeString('ko-KR')
+        }));
+
+        renderCards(cards);
+
+      } catch (err) {
+        console.warn('AI 예측 API 미연동:', err.message);
+
+        try {
+          const canRes = await fetch('/api/trashcan');
+          const cans = await canRes.json();
+
+          const cards = cans.map(can => ({
+            canId: can.id,
+            locName: can.locName,
+            type: 'safe',
+            status: can.locName,
+            detail: '센서 데이터 수집 중입니다. 실제 데이터 연동 후 예측이 시작됩니다.',
+            confidence: 0,
+            time: new Date().toLocaleTimeString('ko-KR')
+          }));
+
+          renderCards(cards);
+        } catch {
+          document.getElementById('pred-grid').innerHTML = `
+            <div class="pred-empty">
+              <div class="pred-empty-icon">⚠️</div>
+              <div>서버 연결에 실패했습니다.<br>잠시 후 다시 시도해 주세요.</div>
+            </div>`;
+        }
+      }
+
+      document.getElementById('last-pred-time').textContent =
+        new Date().toLocaleTimeString('ko-KR') + ' 업데이트';
+    }
+
+    loadPredictions();
+    setInterval(loadPredictions, 30000);
+
+    const dashHamburger = document.getElementById('dashHamburger');
+    const sideNav = document.querySelector('nav.side-nav');
+
+    function initMobileNav() {
+      if (window.innerWidth <= 768) {
+        dashHamburger.style.display = 'flex';
+      } else {
+        dashHamburger.style.display = 'none';
+        sideNav.classList.remove('open');
+        dashHamburger.classList.remove('open');
+      }
+    }
+
+    dashHamburger.addEventListener('click', () => {
+      dashHamburger.classList.toggle('open');
+      sideNav.classList.toggle('open');
+    });
+
+    initMobileNav();
+    window.addEventListener('resize', initMobileNav);
+  </script>
+</body>
+</html>

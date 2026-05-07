@@ -13,6 +13,7 @@
       --text: #e6edf3;
       --text-muted: #7d8590;
       --text-dim: #484f58;
+      --accent: #2ea86a;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
