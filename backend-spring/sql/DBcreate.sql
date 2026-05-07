@@ -1,0 +1,6 @@
+-- Active: 1778113265983@@127.0.0.1@3306@bingo
+CREATE DATABASE IF NOT EXISTS bingo
+  DEFAULT CHARACTER SET utf8mb4
+  DEFAULT COLLATE utf8mb4_unicode_ci;
+
+USE bingo;
