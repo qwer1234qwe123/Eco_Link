@@ -25,4 +25,10 @@ public class PageController {
     public String route() {
         return "forward:/route.html";
     }
+
+    @GetMapping("/trend")
+    public String trend() {
+        return "forward:/trend.html";
+    }
+
 }
