@@ -9,9 +9,6 @@ ai-model/venv/
 # VS Code
 .vscode/
 
-# Eclipse / STS ← 아래 3줄 삭제!
-.metadata/
-
 # Gradle
 .gradle/
 build/
@@ -21,29 +18,8 @@ bin/
 .DS_Store
 Thumbs.db
 
+# 환경변수
 .env
 
-# Python
-__pycache__/
-*.pyc
-ai-model/venv/
-
-# Jupyter
-.ipynb_checkpoints/
-
-# VS Code
-.vscode/
-
-# Eclipse / STS
-.metadata/
-
-# Gradle
-.gradle/
-build/
-bin/
-
-# OS
-.DS_Store
-Thumbs.db
-### Secret ###
+# Secret
 **/application.properties
