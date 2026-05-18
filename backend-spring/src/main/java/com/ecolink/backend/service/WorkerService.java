@@ -1,5 +1,6 @@
 package com.ecolink.backend.service;
 
+import com.ecolink.backend.dto.SignUpRequest;
 import com.ecolink.backend.entity.Worker;
 import com.ecolink.backend.repository.WorkerRepository;
 import lombok.RequiredArgsConstructor;
@@ -8,16 +9,25 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class WorkerService {
+public class WorkerService{
+    private final WorkerRepository WorkerRepository;
 
-    private final WorkerRepository workerRepository;
-
-    public List<Worker> findAll() {
-        return workerRepository.findAll();
+    public List<Worker> findAll(){
+        return WorkerRepository.findAll();
     }
 
-    public Worker findById(Long id) {
-        return workerRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("작업자를 찾을 수 없습니다. id: " + id));
+    public Worker findById(Long id){
+        return WorkerRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("작업자를 찾을 수 없습니다. id: " + id));
+    }
+
+    public void signUp(SignUpRequest request){
+        Worker worker=new Worker(
+            request.getUsername(),
+            request.getPassword(),
+            5,
+            request.getVehicleNumber()
+        );
+        WorkerRepository.save(worker);
     }
 }

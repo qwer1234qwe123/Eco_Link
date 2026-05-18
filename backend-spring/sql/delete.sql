@@ -1,0 +1,1 @@
+DELETE FROM trash_can WHERE id = 1;
