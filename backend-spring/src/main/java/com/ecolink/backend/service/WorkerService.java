@@ -30,4 +30,17 @@ public class WorkerService{
         );
         WorkerRepository.save(worker);
     }
+
+    public void update(Long id, SignUpRequest request){
+        Worker worker = WorkerRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("작업자를 찾을 수 없습니다. id: " + id));
+        worker.update(request.getUsername(), request.getPassword(), request.getVehicleNumber());
+        WorkerRepository.save(worker);
+    }
+
+    public void delete(Long id){
+        WorkerRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("작업자를 찾을 수 없습니다. id: " + id));
+        WorkerRepository.deleteById(id);
+    }
 }

@@ -32,4 +32,16 @@ public class WorkerController{
         WorkerService.signUp(request);
         return ResponseEntity.ok("회원가입 완료");
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<String> update(@PathVariable Long id, @RequestBody SignUpRequest request){
+        WorkerService.update(id, request);
+        return ResponseEntity.ok("수정 완료");
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> delete(@PathVariable Long id){
+        WorkerService.delete(id);
+        return ResponseEntity.ok("삭제 완료");
+    }
 }
