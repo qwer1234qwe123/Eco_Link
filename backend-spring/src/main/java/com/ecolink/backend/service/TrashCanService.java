@@ -31,10 +31,10 @@ public class TrashCanService {
     public TrashCan create(TrashCanRequest request) {
         // 새 쓰레기통 생성 후 DB에 저장
     TrashCan trashCan = new TrashCan(
-        request.getLocName(),
-        request.getLocLat(),
-        request.getLocLng(),
-        request.getMaxCapa()
+        request.getLocName(),       // 위치 이름
+        request.getLocLat(),        // 위도
+        request.getLocLng(),        // 경도
+        request.getMaxCapa()        // 최대 용량
     );
     return trashCanRepository.save(trashCan);
 }
@@ -45,10 +45,10 @@ public TrashCan update(Long id, TrashCanRequest request) {
         // 수정 중 오류 나면 자동으로 되돌리기
     TrashCan trashCan = findById(id);       // id로 해당 쓰레기통 찾기
     trashCan.update(                        // 새 값으로 업데이트
-        request.getLocName(),
-        request.getLocLat(),
-        request.getLocLng(),
-        request.getMaxCapa()
+        request.getLocName(),       // 위치 이름
+        request.getLocLat(),        // 위도
+        request.getLocLng(),        // 경도
+        request.getMaxCapa()        // 최대 용량
     );
     return trashCan;                        // 수정된 쓰레기통 반환
 }

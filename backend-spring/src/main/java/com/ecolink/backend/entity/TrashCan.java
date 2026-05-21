@@ -84,17 +84,17 @@ public class TrashCan {
     // 추가
     public TrashCan(String locName, Double locLat, Double locLng, Integer maxCapa) {
         // 새 쓰레기통 생성할 때 값을 넣어주는 생성자
-    this.locName = locName;
-    this.locLat = locLat;
-    this.locLng = locLng;
-    this.maxCapa = maxCapa;
+    this.locName = locName;     // 위치 이름
+    this.locLat = locLat;       // 위도
+    this.locLng = locLng;       // 경도
+    this.maxCapa = maxCapa;     // 최대 용량
 }
 
 public void update(String locName, Double locLat, Double locLng, Integer maxCapa) {
         // 쓰레기통 정보 수정할 때 값을 업데이트하는 메서드
-    this.locName = locName;
-    this.locLat = locLat;
-    this.locLng = locLng;
-    this.maxCapa = maxCapa;
+    this.locName = locName;     // 위치 이름
+    this.locLat = locLat;       // 위도
+    this.locLng = locLng;       // 경도
+    this.maxCapa = maxCapa;     // 최대 용량
 }
 }
