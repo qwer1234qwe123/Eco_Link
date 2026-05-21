@@ -29,16 +29,19 @@ public class TrashCanController {
 
 
     // 추가
+    // POST /api/trashcan > 새 쓰레기통 추가
     @PostMapping
 public ResponseEntity<TrashCan> create(@RequestBody TrashCanRequest request) {
     return ResponseEntity.ok(trashCanService.create(request));
 }
 
+// PUT /api/trashcan/{id} > id에 해당하는 쓰레기통 수정
 @PutMapping("/{id}")
 public ResponseEntity<TrashCan> update(@PathVariable Long id, @RequestBody TrashCanRequest request) {
     return ResponseEntity.ok(trashCanService.update(id, request));
 }
 
+// DELECT /api/trashcan/{id} > id 에 해당하는 쓰레기통 삭제
 @DeleteMapping("/{id}")
 public ResponseEntity<Void> delete(@PathVariable Long id) {
     trashCanService.delete(id);

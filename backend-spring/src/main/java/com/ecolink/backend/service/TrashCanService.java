@@ -29,6 +29,7 @@ public class TrashCanService {
 
     // 추가
     public TrashCan create(TrashCanRequest request) {
+        // 새 쓰레기통 생성 후 DB에 저장
     TrashCan trashCan = new TrashCan(
         request.getLocName(),
         request.getLocLat(),
@@ -40,18 +41,20 @@ public class TrashCanService {
 
 @Transactional
 public TrashCan update(Long id, TrashCanRequest request) {
-    TrashCan trashCan = findById(id);
-    trashCan.update(
+        // 기존 쓰레기통 정보 수정 후 DB에 반영
+        // 수정 중 오류 나면 자동으로 되돌리기
+    TrashCan trashCan = findById(id);       // id로 해당 쓰레기통 찾기
+    trashCan.update(                        // 새 값으로 업데이트
         request.getLocName(),
         request.getLocLat(),
         request.getLocLng(),
         request.getMaxCapa()
     );
-    return trashCan;
+    return trashCan;                        // 수정된 쓰레기통 반환
 }
 
-public void delete(Long id) {
-    TrashCan trashCan = findById(id);
-    trashCanRepository.delete(trashCan);
+public void delete(Long id) {               // 쓰레기통 삭제
+    TrashCan trashCan = findById(id);       // id로 해당 쓰레기통 찾기
+    trashCanRepository.delete(trashCan);    // DB에서 삭제
 }
 }
