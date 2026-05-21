@@ -78,4 +78,21 @@ public class TrashCan {
     @JsonIgnore
     @OneToMany(mappedBy = "trashCan")
     private List<CollectionHistory> collectionHistories;
+
+
+    
+    // 추가
+    public TrashCan(String locName, Double locLat, Double locLng, Integer maxCapa) {
+    this.locName = locName;
+    this.locLat = locLat;
+    this.locLng = locLng;
+    this.maxCapa = maxCapa;
+}
+
+public void update(String locName, Double locLat, Double locLng, Integer maxCapa) {
+    this.locName = locName;
+    this.locLat = locLat;
+    this.locLng = locLng;
+    this.maxCapa = maxCapa;
+}
 }
