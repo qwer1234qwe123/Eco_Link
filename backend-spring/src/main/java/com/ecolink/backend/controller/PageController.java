@@ -31,4 +31,28 @@ public class PageController {
         return "forward:/trend.html";
     }
 
+    @GetMapping("/worker")
+    public String worker() {
+        return "forward:/worker.html";
+    }
+
+    @GetMapping("/sensor-log")
+    public String sensorLog() {
+        return "forward:/sensor-log.html";
+    }
+
+    @GetMapping("/collection-history")
+    public String collectionHistory() {
+        return "forward:/collection-history.html";
+    }
+
+    @GetMapping("/trashcan")
+    public String trashcan() {
+        return "forward:/trashcan.html";
+    }
+
+    @GetMapping("/login")
+    public String login() {
+        return "forward:/login.html";
+    }
 }

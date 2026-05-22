@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>센서 로그 | EcoLink BinGo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard.css">
+  
+  <style>
+    :root { --accent: #2ea86a; }
+
+    /* 상단 요약 */
+    .log-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    /* 툴바 */
+    .log-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn-refresh-log {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 18px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Noto Sans KR', sans-serif;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    .btn-refresh-log:hover { background: var(--green-light); }
+
+    .last-log-time {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    /* 쓰레기통 섹션 그리드 */
+    .can-sections {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+
+    /* 개별 쓰레기통 섹션 */
+    .can-section {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      animation: fadeInUp 0.4s ease both;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .can-section:nth-child(1) { animation-delay: 0.05s; }
+    .can-section:nth-child(2) { animation-delay: 0.10s; }
+    .can-section:nth-child(3) { animation-delay: 0.15s; }
+    .can-section:nth-child(4) { animation-delay: 0.20s; }
+    .can-section:nth-child(5) { animation-delay: 0.25s; }
+    .can-section:nth-child(6) { animation-delay: 0.30s; }
+
+    /* 섹션 헤더 */
+    .can-section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(255,255,255,0.02);
+    }
+
+    .can-section-left {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .can-section-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(46,168,106,0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--accent);
+    }
+
+    .can-section-id {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .can-section-name {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text);
+      margin-top: 2px;
+    }
+
+    /* 최신 상태 뱃지 */
+    .fill-badge {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 4px;
+    }
+
+    .fill-badge-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .fill-badge-label {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    /* 미니 적재율 바 */
+    .fill-mini-bar {
+      height: 3px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 100px;
+      overflow: hidden;
+      margin: 0 20px 0;
+    }
+
+    .fill-mini-bar-inner {
+      height: 100%;
+      border-radius: 100px;
+      transition: width 0.6s ease;
+    }
+
+    /* 로그 테이블 */
+    .log-table-wrap {
+      max-height: 280px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+    }
+
+    .log-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .log-table th {
+      text-align: left;
+      padding: 8px 20px;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--card);
+      z-index: 1;
+    }
+
+    .log-table td {
+      padding: 10px 20px;
+      font-size: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.03);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .log-table tr:last-child td { border-bottom: none; }
+    .log-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+    .log-fill { font-weight: 600; }
+    .log-battery { color: var(--text-muted); }
+    .log-time { color: var(--text-dim); font-size: 11px; }
+
+    .no-data {
+      padding: 32px 20px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+
+    /* 로그 수 뱃지 */
+    .log-count-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 8px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 100px;
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    @media (max-width: 1100px) {
+      .can-sections { grid-template-columns: 1fr; }
+      .log-stats { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    @media (max-width: 768px) {
+      .log-stats { grid-template-columns: repeat(2, 1fr); }
+      .can-sections { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <script>
+    // ── 권한 체크 (페이지 로드 즉시) ──
+    (function() {
+      var page = window.location.pathname;
+      var restricted = ['/worker', '/trashcan'];
+
+      fetch('/api/auth/me')
+        .then(function(res) {
+          if (!res.ok) {
+            window.location.replace('/login');
+            return null;
+          }
+          return res.json();
+        })
+        .then(function(user) {
+          if (!user) return;
+
+          // grade 5가 제한 페이지 직접 접근 시 차단
+          if (user.grade === 5 && restricted.includes(page)) {
+            alert('접근 권한이 없습니다.');
+            window.location.replace('/dashboard');
+            return;
+          }
+
+          // 사용자 정보 표시
+          var logo = document.querySelector('.sidebar-logo small');
+          if (logo) {
+            logo.textContent = user.username + ' (' + (user.grade === 1 ? '관리자' : '작업자') + ')';
+          }
+
+          // 로그아웃 버튼 표시
+          var logoutBtn = document.getElementById('logout-btn');
+          if (logoutBtn) logoutBtn.style.display = 'block';
+
+          // grade 5: 제한 메뉴 클릭 시 알럿만
+          if (user.grade === 5) {
+            document.querySelectorAll('a[href="/worker"], a[href="/trashcan"]').forEach(function(el) {
+              el.addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('접근 권한이 없습니다.');
+              });
+            });
+          }
+        })
+        .catch(function() {
+          window.location.replace('/login');
+        });
+    })();
+  </script>
+
+  <aside>
+    <div class="sidebar-logo">
+      <h1>Bin<span>Go</span></h1>
+      <small>by EcoLink — 관리자 대시보드</small>
+    </div>
+    <button class="dash-hamburger" id="dashHamburger" aria-label="메뉴" style="display:none">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="side-nav">
+      <div class="nav-group-label">모니터링</div>
+      <a class="nav-item" href="/dashboard"><span class="icon"><i data-lucide="layout-dashboard"></i></span> 대시보드</a>
+      <a class="nav-item" href="/trashcan"><span class="icon"><i data-lucide="trash-2"></i></span> 쓰레기통 목록</a>
+      <a class="nav-item active" href="/sensor-log"><span class="icon"><i data-lucide="radio"></i></span> 센서 로그</a>
+      <div class="nav-group-label">AI / 예측</div>
+      <a class="nav-item" href="/prediction"><span class="icon"><i data-lucide="bot"></i></span> 예측 결과</a>
+      <a class="nav-item" href="/trend"><span class="icon"><i data-lucide="trending-up"></i></span> 적재율 추이</a>
+      <div class="nav-group-label">수거 관리</div>
+      <a class="nav-item" href="/route"><span class="icon"><i data-lucide="map"></i></span> 수거 경로</a>
+      <a class="nav-item" href="/collection-history"><span class="icon"><i data-lucide="clipboard-list"></i></span> 수거 기록</a>
+      <a class="nav-item" href="/worker"><span class="icon"><i data-lucide="hard-hat"></i></span> 작업자 관리</a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="/">← 소개 페이지로</a>
+      <a id="logout-btn" href="#" onclick="logout()" style="display:none;margin-top:8px;color:#ef4444;font-size:13px;text-decoration:none;">로그아웃</a>
+    </div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <div class="topbar-left">
+        <h2>센서 로그 <span class="live-badge"><span class="live-dot"></span>LIVE</span></h2>
+        <p>쓰레기통별 적재율 및 배터리 센서 기록</p>
+      </div>
+      <div class="topbar-right">
+        <span class="time" id="clock">--:--:--</span>
+        <button class="btn-refresh-log" onclick="loadLogs()">
+          <i data-lucide="refresh-cw" style="width:14px;height:14px"></i>
+          새로고침
+        </button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- 요약 카드 -->
+      <div class="log-stats">
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <span class="stat-card-label">전체 로그 수</span>
+            <span class="stat-card-icon"><i data-lucide="database"></i></span>
+          </div>
+          <div class="stat-card-value v-green" id="stat-total-logs">—</div>
+          <div class="stat-card-sub">누적 센서 기록</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <span class="stat-card-label">평균 적재율</span>
+            <span class="stat-card-icon"><i data-lucide="bar-chart-2"></i></span>
+          </div>
+          <div class="stat-card-value v-yellow" id="stat-avg-fill">—</div>
+          <div class="stat-card-sub">전체 쓰레기통 기준</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <span class="stat-card-label">80% 이상</span>
+            <span class="stat-card-icon"><i data-lucide="alert-triangle"></i></span>
+          </div>
+          <div class="stat-card-value v-red" id="stat-danger">—</div>
+          <div class="stat-card-sub">즉시 수거 필요</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <span class="stat-card-label">마지막 업데이트</span>
+            <span class="stat-card-icon"><i data-lucide="clock"></i></span>
+          </div>
+          <div class="stat-card-value v-blue" style="font-size:1.1rem" id="stat-last-time">—</div>
+          <div class="stat-card-sub">최근 센서 수신</div>
+        </div>
+      </div>
+
+      <!-- 업데이트 시간 -->
+      <div class="log-toolbar">
+        <span class="last-log-time" id="last-log-time">업데이트 중...</span>
+      </div>
+
+      <!-- 쓰레기통별 섹션 -->
+      <div class="can-sections" id="can-sections">
+        <div class="loading"><div class="spinner"></div> 데이터 불러오는 중...</div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    // ── 시계 ──
+    function updateClock() {
+      document.getElementById('clock').textContent =
+        new Date().toLocaleTimeString('ko-KR', { hour12: false });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // ── 색상 ──
+    function getFillColor(v) {
+      if (v >= 80) return '#ef4444';
+      if (v >= 60) return '#f59e0b';
+      return '#2ea86a';
+    }
+
+    function getBatteryColor(v) {
+      if (v <= 20) return '#ef4444';
+      if (v <= 40) return '#f59e0b';
+      return '#2ea86a';
+    }
+
+    // ── 시간 포맷 ──
+    function formatTime(dateStr) {
+      if (!dateStr) return '—';
+      const d = new Date(dateStr);
+      return d.toLocaleString('ko-KR', { month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+    }
+
+    // ── 섹션 렌더링 ──
+    function renderSections(cans, logsByCan) {
+      const container = document.getElementById('can-sections');
+
+      if (!cans || cans.length === 0) {
+        container.innerHTML = `<div class="loading">쓰레기통 데이터가 없습니다.</div>`;
+        return;
+      }
+
+      let totalLogs = 0;
+      let fillLevels = [];
+      let lastTime = null;
+
+      container.innerHTML = cans.map((can, i) => {
+        const logs = logsByCan[can.id] || [];
+        const latest = logs.length > 0 ? logs[0] : null;
+        const fill = latest ? latest.fillLevel : 0;
+        const battery = latest ? latest.batteryLevel : 0;
+        const color = getFillColor(fill);
+
+        totalLogs += logs.length;
+        if (latest) fillLevels.push(fill);
+        if (latest && latest.logTime) {
+          const t = new Date(latest.logTime);
+          if (!lastTime || t > lastTime) lastTime = t;
+        }
+
+        return `
+          <div class="can-section" style="animation-delay:${i * 0.05}s">
+            <div class="can-section-header">
+              <div class="can-section-left">
+                <div class="can-section-icon">
+                  <i data-lucide="trash-2" style="width:16px;height:16px"></i>
+                </div>
+                <div>
+                  <div class="can-section-id">CAN #${can.id}</div>
+                  <div class="can-section-name">${can.locName}</div>
+                </div>
+              </div>
+              <div class="fill-badge">
+                <div class="fill-badge-val" style="color:${color}">${fill}%</div>
+                <div class="fill-badge-label">
+                  🔋 ${battery}% &nbsp;
+                  <span class="log-count-badge">${logs.length}건</span>
+                </div>
+              </div>
+            </div>
+            <div class="fill-mini-bar">
+              <div class="fill-mini-bar-inner" style="width:${fill}%;background:${color}"></div>
+            </div>
+            <div class="log-table-wrap">
+              ${logs.length === 0
+                ? `<div class="no-data">센서 데이터가 없습니다.</div>`
+                : `<table class="log-table">
+                    <thead>
+                      <tr>
+                        <th>적재율</th>
+                        <th>배터리</th>
+                        <th>수신 시각</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      ${logs.map(log => `
+                        <tr>
+                          <td class="log-fill" style="color:${getFillColor(log.fillLevel)}">${log.fillLevel}%</td>
+                          <td class="log-battery" style="color:${getBatteryColor(log.batteryLevel)}">${log.batteryLevel}%</td>
+                          <td class="log-time">${formatTime(log.logTime)}</td>
+                        </tr>
+                      `).join('')}
+                    </tbody>
+                  </table>`
+              }
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // 요약 카드 업데이트
+      document.getElementById('stat-total-logs').textContent = totalLogs;
+      document.getElementById('stat-avg-fill').textContent =
+        fillLevels.length > 0 ? Math.round(fillLevels.reduce((a, b) => a + b, 0) / fillLevels.length) + '%' : '—';
+      document.getElementById('stat-danger').textContent =
+        fillLevels.filter(v => v >= 80).length + '개';
+      document.getElementById('stat-last-time').textContent =
+        lastTime ? lastTime.toLocaleTimeString('ko-KR', { hour12: false }) : '—';
+
+      lucide.createIcons();
+    }
+
+    // ── 데이터 로드 ──
+    async function loadLogs() {
+      document.getElementById('last-log-time').textContent = '업데이트 중...';
+
+      try {
+        // 쓰레기통 목록
+        const canRes = await fetch('/api/trashcan');
+        const cans = await canRes.json();
+
+        // 각 쓰레기통 로그
+        const logsByCan = {};
+        await Promise.all(
+          cans.map(async (can) => {
+            try {
+              const res = await fetch(`/api/sensor/${can.id}`);
+              const logs = await res.json();
+              // 최신순 정렬
+              logsByCan[can.id] = logs.sort((a, b) =>
+                new Date(b.logTime) - new Date(a.logTime)
+              );
+            } catch {
+              logsByCan[can.id] = [];
+            }
+          })
+        );
+
+        renderSections(cans, logsByCan);
+
+      } catch (err) {
+        console.error('데이터 로드 실패:', err);
+        document.getElementById('can-sections').innerHTML =
+          `<div class="loading">서버 연결에 실패했습니다.</div>`;
+      }
+
+      document.getElementById('last-log-time').textContent =
+        new Date().toLocaleTimeString('ko-KR') + ' 업데이트';
+    }
+
+    // ── 모바일 햄버거 ──
+    const dashHamburger = document.getElementById('dashHamburger');
+    const sideNav = document.querySelector('nav.side-nav');
+    function initMobileNav() {
+      if (window.innerWidth <= 768) { dashHamburger.style.display = 'flex'; }
+      else { dashHamburger.style.display = 'none'; sideNav.classList.remove('open'); dashHamburger.classList.remove('open'); }
+    }
+    dashHamburger.addEventListener('click', () => { dashHamburger.classList.toggle('open'); sideNav.classList.toggle('open'); });
+    initMobileNav();
+    window.addEventListener('resize', initMobileNav);
+
+    loadLogs();
+    setInterval(loadLogs, 30000);
+  </script>
+  <script>
+    (function() {
+      var script = document.createElement('script');
+      script.src = 'https://unpkg.com/lucide@latest/dist/umd/lucide.min.js';
+      script.onload = function() { lucide.createIcons(); };
+      document.head.appendChild(script);
+    })();
+  </script>
+  <script>
+    function logout() {
+      fetch('/api/auth/logout', { method: 'POST' })
+        .then(function() { window.location.href = '/login'; });
+    }
+  </script>
+</body>
+</html>

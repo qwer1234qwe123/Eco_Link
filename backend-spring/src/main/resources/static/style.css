@@ -182,7 +182,6 @@
       transition: background 0.3s;
     }
     .intro-card:hover { background: #f0faf5; }
-    .intro-icon { font-size: 2rem; margin-bottom: 20px; display: block; }
     .intro-card h3 {
       font-size: 17px; font-weight: 700; color: var(--green-dark);
       margin-bottom: 10px;
@@ -233,7 +232,7 @@
       font-size: 2.4rem; font-weight: 700; color: var(--green-dark);
       margin-bottom: 60px;
     }
-    .team-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px; }
+    .team-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; max-width: 860px; margin: 0 auto; }
     .team-card {
       background: var(--white); border-radius: 12px; padding: 28px 20px;
       text-align: center; border: 1px solid rgba(0,0,0,0.06);
@@ -242,10 +241,11 @@
     .team-card:hover { transform: translateY(-4px); box-shadow: 0 16px 40px rgba(0,0,0,0.08); }
     .team-avatar {
       width: 60px; height: 60px; border-radius: 50%;
-      background: var(--green-mid); display: flex; align-items: center;
+      background: var(--green-dark); display: flex; align-items: center;
       justify-content: center; margin: 0 auto 16px;
-      font-size: 22px; color: var(--white);
+      color: var(--green-neon);
     }
+    .team-avatar svg { width: 26px; height: 26px; stroke: var(--green-neon); }
     .team-role {
       display: inline-block; font-size: 11px; font-weight: 700;
       letter-spacing: 1px; text-transform: uppercase;
@@ -350,7 +350,7 @@
       #tech { padding: 70px 40px; }
       #cta { padding: 100px 40px; }
       footer { padding: 40px 40px; }
-      .team-grid { grid-template-columns: repeat(3, 1fr); }
+      .team-grid { grid-template-columns: repeat(2, 1fr); }
       .hero-content { flex: 0 0 50%; max-width: 50%; }
       .hero-illustration { flex: 0 0 50%; max-width: 50%; }
     }

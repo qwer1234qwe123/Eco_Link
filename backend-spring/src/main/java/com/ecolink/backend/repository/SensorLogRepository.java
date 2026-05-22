@@ -12,4 +12,5 @@ public interface SensorLogRepository extends JpaRepository<SensorLog, Long> {
 
     List<SensorLog> findByTrashCanId(Long canId);
 
+    List<SensorLog> findTop1ByTrashCanIdOrderByLogTimeDesc(Long canId);
 }

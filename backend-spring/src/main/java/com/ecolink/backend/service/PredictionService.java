@@ -2,8 +2,10 @@ package com.ecolink.backend.service;
 
 import com.ecolink.backend.dto.PredictRequest;
 import com.ecolink.backend.dto.PredictResponse;
+import com.ecolink.backend.entity.EmptyHistory;
 import com.ecolink.backend.entity.SensorLog;
 import com.ecolink.backend.entity.TrashCan;
+import com.ecolink.backend.repository.EmptyHistoryRepository;
 import com.ecolink.backend.repository.SensorLogRepository;
 import com.ecolink.backend.repository.TrashCanRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,30 +27,25 @@ public class PredictionService {
     private final RestTemplate restTemplate;
     private final SensorLogRepository sensorLogRepository;
     private final TrashCanRepository trashCanRepository;
+    private final EmptyHistoryRepository emptyHistoryRepository;
 
     @Value("${ai.server.url}")
     private String aiServerUrl;
 
-    /**
-     * 특정 쓰레기통 단일 예측 요청
-     */
     public PredictResponse predict(Long canId) {
-        // 쓰레기통 정보 조회 (위치명 포함)
         TrashCan can = trashCanRepository.findById(canId).orElse(null);
         String locName = (can != null) ? can.getLocName() : canId + "번 쓰레기통";
 
-        // 최근 센서 로그 5개 조회
         List<SensorLog> logs = sensorLogRepository
                 .findTop5ByCanIdOrderByLogTimeDesc(canId);
 
-        // 센서 데이터 없으면 데이터 없음 반환
         if (logs.isEmpty()) {
             return PredictResponse.builder()
                     .canId(canId)
                     .locName(locName)
                     .needsCollection(false)
                     .confidence(0.0)
-                    .predictedStatus(locName)
+                    .predictedStatus("정상") // ← 수정
                     .message("센서 데이터가 없습니다.")
                     .build();
         }
@@ -56,7 +54,6 @@ public class PredictionService {
         double fillRate = calculateFillRate(logs);
         double hoursSinceEmpty = calculateHoursSinceEmpty(canId);
 
-        // FastAPI 요청 생성
         PredictRequest request = PredictRequest.builder()
                 .canId(canId)
                 .fillLevel(latest.getFillLevel())
@@ -66,7 +63,6 @@ public class PredictionService {
                 .batteryLevel(latest.getBatteryLevel())
                 .build();
 
-        // FastAPI 호출
         try {
             PredictResponse response = restTemplate.postForObject(
                     aiServerUrl + "/predict",
@@ -75,7 +71,8 @@ public class PredictionService {
             if (response != null) {
                 response.setLocName(locName);
             }
-            log.info("예측 완료 - canId: {}, 결과: {}", canId, response);
+            log.info("예측 완료 - canId: {}, hoursSinceEmpty: {}h, 결과: {}",
+                    canId, hoursSinceEmpty, response);
             return response;
         } catch (Exception e) {
             log.error("FastAPI 호출 실패 - canId: {}, 오류: {}", canId, e.getMessage());
@@ -84,15 +81,12 @@ public class PredictionService {
                     .locName(locName)
                     .needsCollection(false)
                     .confidence(0.0)
-                    .predictedStatus(locName)
+                    .predictedStatus("정상") // ← 수정
                     .message("AI 서버 연결에 실패했습니다.")
                     .build();
         }
     }
 
-    /**
-     * 전체 쓰레기통 일괄 예측
-     */
     public List<PredictResponse> predictAll() {
         List<TrashCan> cans = trashCanRepository.findAll();
         return cans.stream()
@@ -100,9 +94,6 @@ public class PredictionService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * 최근 센서 로그로 시간당 증가 속도 계산
-     */
     private double calculateFillRate(List<SensorLog> logs) {
         if (logs.size() < 2)
             return 0.0;
@@ -112,10 +103,18 @@ public class PredictionService {
         return Math.max(0, (last - first) / hours);
     }
 
-    /**
-     * 마지막 비움 이후 경과 시간 계산 (추후 EmptyHistory 연동)
-     */
     private double calculateHoursSinceEmpty(Long canId) {
-        return 999.0;
+        List<EmptyHistory> empties = emptyHistoryRepository
+                .findTop1ByTrashCanIdOrderByEmptiedAtDesc(canId);
+
+        if (empties.isEmpty()) {
+            log.debug("비움 기록 없음 - canId: {}, hours_since_empty: 999.0", canId);
+            return 999.0;
+        }
+
+        LocalDateTime lastEmpty = empties.get(0).getEmptiedAt();
+        double hours = ChronoUnit.MINUTES.between(lastEmpty, LocalDateTime.now()) / 60.0;
+        log.debug("마지막 비움 시각: {}, 경과 시간: {}h", lastEmpty, hours);
+        return Math.round(hours * 100.0) / 100.0;
     }
 }

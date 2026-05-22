@@ -7,8 +7,58 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="dashboard.css">
+  
 </head>
 <body>
+  <script>
+    // ── 권한 체크 (페이지 로드 즉시) ──
+    (function() {
+      var page = window.location.pathname;
+      var restricted = ['/worker', '/trashcan'];
+
+      fetch('/api/auth/me')
+        .then(function(res) {
+          if (!res.ok) {
+            window.location.replace('/login');
+            return null;
+          }
+          return res.json();
+        })
+        .then(function(user) {
+          if (!user) return;
+
+          // grade 5가 제한 페이지 직접 접근 시 차단
+          if (user.grade === 5 && restricted.includes(page)) {
+            alert('접근 권한이 없습니다.');
+            window.location.replace('/dashboard');
+            return;
+          }
+
+          // 사용자 정보 표시
+          var logo = document.querySelector('.sidebar-logo small');
+          if (logo) {
+            logo.textContent = user.username + ' (' + (user.grade === 1 ? '관리자' : '작업자') + ')';
+          }
+
+          // 로그아웃 버튼 표시
+          var logoutBtn = document.getElementById('logout-btn');
+          if (logoutBtn) logoutBtn.style.display = 'block';
+
+          // grade 5: 제한 메뉴 클릭 시 알럿만
+          if (user.grade === 5) {
+            document.querySelectorAll('a[href="/worker"], a[href="/trashcan"]').forEach(function(el) {
+              el.addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('접근 권한이 없습니다.');
+              });
+            });
+          }
+        })
+        .catch(function() {
+          window.location.replace('/login');
+        });
+    })();
+  </script>
 
   <!-- SIDEBAR -->
   <aside>
@@ -22,36 +72,37 @@
     <nav class="side-nav">
       <div class="nav-group-label">모니터링</div>
       <a class="nav-item active" href="/dashboard">
-        <span class="icon">📊</span> 대시보드
+        <span class="icon"><i data-lucide="layout-dashboard"></i></span> 대시보드
       </a>
-      <a class="nav-item" href="#">
-        <span class="icon">🗑️</span> 쓰레기통 목록
+      <a class="nav-item" href="/trashcan">
+        <span class="icon"><i data-lucide="trash-2"></i></span> 쓰레기통 목록
       </a>
-      <a class="nav-item" href="#">
-        <span class="icon">📡</span> 센서 로그
+      <a class="nav-item" href="/sensor-log">
+        <span class="icon"><i data-lucide="radio"></i></span> 센서 로그
       </a>
 
       <div class="nav-group-label">AI / 예측</div>
       <a class="nav-item" href="/prediction">
-        <span class="icon">🤖</span> 예측 결과
+        <span class="icon"><i data-lucide="bot"></i></span> 예측 결과
       </a>
       <a class="nav-item" href="/trend">
-        <span class="icon">📈</span> 적재율 추이
+        <span class="icon"><i data-lucide="trending-up"></i></span> 적재율 추이
       </a>
 
       <div class="nav-group-label">수거 관리</div>
       <a class="nav-item" href="/route">
-        <span class="icon">🗺️</span> 수거 경로
+        <span class="icon"><i data-lucide="map"></i></span> 수거 경로
       </a>
-      <a class="nav-item" href="#">
-        <span class="icon">📋</span> 수거 기록
+      <a class="nav-item" href="/collection-history">
+        <span class="icon"><i data-lucide="clipboard-list"></i></span> 수거 기록
       </a>
-      <a class="nav-item" href="#">
-        <span class="icon">👷</span> 작업자 관리
+      <a class="nav-item" href="/worker">
+        <span class="icon"><i data-lucide="hard-hat"></i></span> 작업자 관리
       </a>
     </nav>
     <div class="sidebar-footer">
       <a href="/">← 소개 페이지로</a>
+      <a id="logout-btn" href="#" onclick="logout()" style="display:none;margin-top:8px;color:#ef4444;font-size:13px;text-decoration:none;">로그아웃</a>
     </div>
   </aside>
 
@@ -74,7 +125,7 @@
         <div class="stat-card">
           <div class="stat-card-header">
             <span class="stat-card-label">전체 쓰레기통</span>
-            <span class="stat-card-icon">🗑️</span>
+            <span class="stat-card-icon"><i data-lucide="trash-2"></i></span>
           </div>
           <div class="stat-card-value v-green" id="stat-total">—</div>
           <div class="stat-card-sub">모니터링 중</div>
@@ -82,7 +133,7 @@
         <div class="stat-card">
           <div class="stat-card-header">
             <span class="stat-card-label">수거 필요</span>
-            <span class="stat-card-icon">🚨</span>
+            <span class="stat-card-icon"><i data-lucide="bell-ring"></i></span>
           </div>
           <div class="stat-card-value v-red" id="stat-full">—</div>
           <div class="stat-card-sub">80% 이상 적재</div>
@@ -90,7 +141,7 @@
         <div class="stat-card">
           <div class="stat-card-header">
             <span class="stat-card-label">AI 예측 대상</span>
-            <span class="stat-card-icon">🤖</span>
+            <span class="stat-card-icon"><i data-lucide="bot"></i></span>
           </div>
           <div class="stat-card-value v-yellow" id="stat-pred">—</div>
           <div class="stat-card-sub">오후 6시 전 포화 예상</div>
@@ -98,7 +149,7 @@
         <div class="stat-card">
           <div class="stat-card-header">
             <span class="stat-card-label">오늘 수거 완료</span>
-            <span class="stat-card-icon">✅</span>
+            <span class="stat-card-icon"><i data-lucide="check-circle"></i></span>
           </div>
           <div class="stat-card-value v-blue" id="stat-done">—</div>
           <div class="stat-card-sub">비움 처리 완료</div>
@@ -158,5 +209,19 @@
   </main>
 
   <script src="dashboard.js"></script>
+  <script>
+    (function() {
+      var script = document.createElement('script');
+      script.src = 'https://unpkg.com/lucide@latest/dist/umd/lucide.min.js';
+      script.onload = function() { lucide.createIcons(); };
+      document.head.appendChild(script);
+    })();
+  </script>
+  <script>
+    function logout() {
+      fetch('/api/auth/logout', { method: 'POST' })
+        .then(function() { window.location.href = '/login'; });
+    }
+  </script>
 </body>
 </html>

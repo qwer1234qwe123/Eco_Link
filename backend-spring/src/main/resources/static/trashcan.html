@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>쓰레기통 목록 | EcoLink BinGo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard.css">
+  
+  <style>
+    :root { --accent: #2ea86a; }
+
+    .can-stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .can-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .can-search {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      flex: 1;
+      max-width: 320px;
+    }
+
+    .can-search input {
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-size: 13px;
+      font-family: 'Noto Sans KR', sans-serif;
+      width: 100%;
+    }
+
+    .can-search input::placeholder { color: var(--text-muted); }
+    .can-search svg { color: var(--text-muted); flex-shrink: 0; }
+
+    .btn-add {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 18px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Noto Sans KR', sans-serif;
+      transition: background 0.2s;
+      white-space: nowrap;
+    }
+    .btn-add:hover { background: var(--green-light); }
+
+    /* 카드 그리드 */
+    .can-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+
+    .can-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      animation: fadeInUp 0.4s ease both;
+    }
+
+    .can-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .can-card:nth-child(1) { animation-delay: 0.05s; }
+    .can-card:nth-child(2) { animation-delay: 0.10s; }
+    .can-card:nth-child(3) { animation-delay: 0.15s; }
+    .can-card:nth-child(4) { animation-delay: 0.20s; }
+    .can-card:nth-child(5) { animation-delay: 0.25s; }
+    .can-card:nth-child(6) { animation-delay: 0.30s; }
+
+    .can-card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .can-card-id {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+    }
+
+    .can-card-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* 적재율 */
+    .can-fill-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .can-fill-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .can-fill-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 13px;
+    }
+
+    .can-fill-bg {
+      height: 8px;
+      background: rgba(255,255,255,0.06);
+      border-radius: 100px;
+      overflow: hidden;
+    }
+
+    .can-fill-bar {
+      height: 100%;
+      border-radius: 100px;
+      transition: width 0.6s ease;
+    }
+
+    /* 위치 정보 */
+    .can-info {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .can-info-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .can-info-row svg { flex-shrink: 0; }
+
+    .can-info-val {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+    }
+
+    /* 상태 뱃지 */
+    .can-status-badge {
+      padding: 4px 10px;
+      border-radius: 100px;
+      font-size: 11px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .status-ok     { background: rgba(46,168,106,0.15); color: #2ea86a; }
+    .status-warn   { background: rgba(245,158,11,0.15); color: #f59e0b; }
+    .status-danger { background: rgba(239,68,68,0.15); color: #ef4444; }
+
+    /* 액션 버튼 */
+    .can-card-actions {
+      display: flex;
+      gap: 8px;
+      padding-top: 4px;
+      border-top: 1px solid var(--border);
+    }
+
+    .btn-edit, .btn-delete {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 8px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      font-family: 'Noto Sans KR', sans-serif;
+      transition: background 0.2s;
+    }
+
+    .btn-edit {
+      background: rgba(255,255,255,0.06);
+      color: var(--text-muted);
+    }
+    .btn-edit:hover { background: rgba(255,255,255,0.1); color: var(--text); }
+
+    .btn-delete {
+      background: rgba(239,68,68,0.1);
+      color: #ef4444;
+    }
+    .btn-delete:hover { background: rgba(239,68,68,0.2); }
+
+    /* 모달 */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      width: 100%;
+      max-width: 480px;
+      margin: 20px;
+      animation: modalIn 0.2s ease;
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(-16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .modal-title { font-size: 16px; font-weight: 700; }
+
+    .btn-modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+    }
+    .btn-modal-close:hover { color: var(--text); }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+    }
+
+    .form-input {
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-size: 13px;
+      font-family: 'Noto Sans KR', sans-serif;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 100%;
+    }
+    .form-input:focus { border-color: var(--accent); }
+    .form-input::placeholder { color: var(--text-dim); }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .btn-cancel {
+      padding: 9px 20px;
+      background: rgba(255,255,255,0.06);
+      color: var(--text-muted);
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      cursor: pointer;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+    .btn-cancel:hover { background: rgba(255,255,255,0.1); }
+
+    .btn-submit {
+      padding: 9px 20px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Noto Sans KR', sans-serif;
+      transition: background 0.2s;
+    }
+    .btn-submit:hover { background: var(--green-light); }
+
+    .btn-submit-delete {
+      padding: 9px 20px;
+      background: #ef4444;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+    .btn-submit-delete:hover { background: #dc2626; }
+
+    .delete-modal-body {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+
+    .delete-target { font-weight: 700; color: var(--text); }
+
+    .can-empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    @media (max-width: 768px) {
+      .can-stats { grid-template-columns: repeat(2, 1fr); }
+      .can-toolbar { flex-direction: column; align-items: stretch; }
+      .can-search { max-width: 100%; }
+      .can-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <script>
+    // ── 권한 체크 (페이지 로드 즉시) ──
+    (function() {
+      var page = window.location.pathname;
+      var restricted = ['/worker', '/trashcan'];
+
+      fetch('/api/auth/me')
+        .then(function(res) {
+          if (!res.ok) {
+            window.location.replace('/login');
+            return null;
+          }
+          return res.json();
+        })
+        .then(function(user) {
+          if (!user) return;
+
+          // grade 5가 제한 페이지 직접 접근 시 차단
+          if (user.grade === 5 && restricted.includes(page)) {
+            alert('접근 권한이 없습니다.');
+            window.location.replace('/dashboard');
+            return;
+          }
+
+          // 사용자 정보 표시
+          var logo = document.querySelector('.sidebar-logo small');
+          if (logo) {
+            logo.textContent = user.username + ' (' + (user.grade === 1 ? '관리자' : '작업자') + ')';
+          }
+
+          // 로그아웃 버튼 표시
+          var logoutBtn = document.getElementById('logout-btn');
+          if (logoutBtn) logoutBtn.style.display = 'block';
+
+          // grade 5: 제한 메뉴 클릭 시 알럿만
+          if (user.grade === 5) {
+            document.querySelectorAll('a[href="/worker"], a[href="/trashcan"]').forEach(function(el) {
+              el.addEventListener('click', function(e) {
+                e.preventDefault();
+                alert('접근 권한이 없습니다.');
+              });
+            });
+          }
+        })
+        .catch(function() {
+          window.location.replace('/login');
+        });
+    })();
+  </script>
+
+  <aside>
+    <div class="sidebar-logo">
+      <h1>Bin<span>Go</span></h1>
+      <small>by EcoLink — 관리자 대시보드</small>
+    </div>
+    <button class="dash-hamburger" id="dashHamburger" aria-label="메뉴" style="display:none">
+      <span></span><span></span><span></span>
+    </button>
+    <nav class="side-nav">
+      <div class="nav-group-label">모니터링</div>
+      <a class="nav-item" href="/dashboard"><span class="icon"><i data-lucide="layout-dashboard"></i></span> 대시보드</a>
+      <a class="nav-item active" href="/trashcan"><span class="icon"><i data-lucide="trash-2"></i></span> 쓰레기통 목록</a>
+      <a class="nav-item" href="/sensor-log"><span class="icon"><i data-lucide="radio"></i></span> 센서 로그</a>
+      <div class="nav-group-label">AI / 예측</div>
+      <a class="nav-item" href="/prediction"><span class="icon"><i data-lucide="bot"></i></span> 예측 결과</a>
+      <a class="nav-item" href="/trend"><span class="icon"><i data-lucide="trending-up"></i></span> 적재율 추이</a>
+      <div class="nav-group-label">수거 관리</div>
+      <a class="nav-item" href="/route"><span class="icon"><i data-lucide="map"></i></span> 수거 경로</a>
+      <a class="nav-item" href="/collection-history"><span class="icon"><i data-lucide="clipboard-list"></i></span> 수거 기록</a>
+      <a class="nav-item" href="/worker"><span class="icon"><i data-lucide="hard-hat"></i></span> 작업자 관리</a>
+    </nav>
+    <div class="sidebar-footer">
+      <a href="/">← 소개 페이지로</a>
+      <a id="logout-btn" href="#" onclick="logout()" style="display:none;margin-top:8px;color:#ef4444;font-size:13px;text-decoration:none;">로그아웃</a>
+    </div>
+  </aside>
+
+  <main>
+    <div class="topbar">
+      <div class="topbar-left">
+        <h2>쓰레기통 목록</h2>
+        <p>설치된 쓰레기통 현황 및 관리</p>
+      </div>
+      <div class="topbar-right">
+        <span class="time" id="clock">--:--:--</span>
+        <button class="btn-refresh" onclick="loadCans()">↻ 새로고침</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- 통계 카드 -->
+      <div class="can-stats">
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <span class="stat-card-label">전체 쓰레기통</span>
+            <span class="stat-card-icon"><i data-lucide="trash-2"></i></span>
+          </div>
+          <div class="stat-card-value v-green" id="stat-total">—</div>
+          <div class="stat-card-sub">설치된 총 개수</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <span class="stat-card-label">즉시 수거 필요</span>
+            <span class="stat-card-icon"><i data-lucide="alert-triangle"></i></span>
+          </div>
+          <div class="stat-card-value v-red" id="stat-danger">—</div>
+          <div class="stat-card-sub">80% 이상 적재</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <span class="stat-card-label">주의</span>
+            <span class="stat-card-icon"><i data-lucide="alert-circle"></i></span>
+          </div>
+          <div class="stat-card-value v-yellow" id="stat-warn">—</div>
+          <div class="stat-card-sub">60~79% 적재</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-card-header">
+            <span class="stat-card-label">정상</span>
+            <span class="stat-card-icon"><i data-lucide="check-circle"></i></span>
+          </div>
+          <div class="stat-card-value v-blue" id="stat-ok">—</div>
+          <div class="stat-card-sub">60% 미만 적재</div>
+        </div>
+      </div>
+
+      <!-- 툴바 -->
+      <div class="can-toolbar">
+        <div class="can-search">
+          <i data-lucide="search" style="width:14px;height:14px"></i>
+          <input type="text" id="search-input" placeholder="위치명 검색..." oninput="applyFilter()">
+        </div>
+        <button class="btn-add" onclick="openAddModal()">
+          <i data-lucide="plus" style="width:14px;height:14px"></i>
+          쓰레기통 추가
+        </button>
+      </div>
+
+      <!-- 카드 그리드 -->
+      <div class="can-grid" id="can-grid">
+        <div class="loading"><div class="spinner"></div> 불러오는 중...</div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- 추가/수정 모달 -->
+  <div class="modal-overlay" id="formModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title" id="modal-title">쓰레기통 추가</div>
+        <button class="btn-modal-close" onclick="closeModal()">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">위치명</label>
+        <input type="text" class="form-input" id="f-locname" placeholder="예: 폴리텍대학교 앞">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">위도 (lat)</label>
+          <input type="number" step="0.0001" class="form-input" id="f-lat" placeholder="예: 36.7706">
+        </div>
+        <div class="form-group">
+          <label class="form-label">경도 (lng)</label>
+          <input type="number" step="0.0001" class="form-input" id="f-lng" placeholder="예: 126.9317">
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">최대 용량 (cm)</label>
+        <input type="number" class="form-input" id="f-maxcapa" placeholder="예: 100">
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeModal()">취소</button>
+        <button class="btn-submit" id="modal-submit-btn" onclick="submitForm()">추가</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 삭제 확인 모달 -->
+  <div class="modal-overlay" id="deleteModal">
+    <div class="modal">
+      <div class="modal-header">
+        <div class="modal-title">쓰레기통 삭제</div>
+        <button class="btn-modal-close" onclick="closeDeleteModal()">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+      <div class="delete-modal-body">
+        <span class="delete-target" id="delete-target-name"></span>을(를) 삭제하시겠습니까?<br>
+        삭제 후 복구가 불가능합니다.
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeDeleteModal()">취소</button>
+        <button class="btn-submit-delete" onclick="confirmDelete()">삭제</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function updateClock() {
+      document.getElementById('clock').textContent =
+        new Date().toLocaleTimeString('ko-KR', { hour12: false });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    let allCans = [];
+    let fillMap = {};
+    let editingId = null;
+    let deletingId = null;
+
+    function getFillColor(v) {
+      if (v >= 80) return '#ef4444';
+      if (v >= 60) return '#f59e0b';
+      return '#2ea86a';
+    }
+
+    function getStatusBadge(v) {
+      if (v >= 80) return `<span class="can-status-badge status-danger">수거 필요</span>`;
+      if (v >= 60) return `<span class="can-status-badge status-warn">주의</span>`;
+      return `<span class="can-status-badge status-ok">정상</span>`;
+    }
+
+    function renderCards(cans) {
+      const grid = document.getElementById('can-grid');
+      if (!cans || cans.length === 0) {
+        grid.innerHTML = `<div class="can-empty">등록된 쓰레기통이 없습니다.</div>`;
+        return;
+      }
+
+      grid.innerHTML = cans.map((can, i) => {
+        const fill = fillMap[can.id] ?? 0;
+        const color = getFillColor(fill);
+        return `
+          <div class="can-card" style="animation-delay:${i * 0.05}s">
+            <div class="can-card-top">
+              <div>
+                <div class="can-card-id">CAN #${can.id}</div>
+                <div class="can-card-name">${can.locName}</div>
+              </div>
+              ${getStatusBadge(fill)}
+            </div>
+
+            <div class="can-fill-wrap">
+              <div class="can-fill-label">
+                <span>현재 적재율</span>
+                <span class="can-fill-val" style="color:${color}">${fill}%</span>
+              </div>
+              <div class="can-fill-bg">
+                <div class="can-fill-bar" style="width:${fill}%;background:${color}"></div>
+              </div>
+            </div>
+
+            <div class="can-info">
+              <div class="can-info-row">
+                <i data-lucide="map-pin" style="width:12px;height:12px"></i>
+                <span class="can-info-val">${can.locLat ?? '—'}, ${can.locLng ?? '—'}</span>
+              </div>
+              <div class="can-info-row">
+                <i data-lucide="ruler" style="width:12px;height:12px"></i>
+                <span>최대 용량: <span class="can-info-val">${can.maxCapa ?? '—'} cm</span></span>
+              </div>
+            </div>
+
+            <div class="can-card-actions">
+              <button class="btn-edit" onclick="openEditModal(${can.id})">
+                <i data-lucide="pencil" style="width:12px;height:12px"></i> 수정
+              </button>
+              <button class="btn-delete" onclick="openDeleteModal(${can.id}, '${can.locName}')">
+                <i data-lucide="trash-2" style="width:12px;height:12px"></i> 삭제
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function applyFilter() {
+      const keyword = document.getElementById('search-input').value.toLowerCase();
+      const filtered = keyword
+        ? allCans.filter(c => c.locName.toLowerCase().includes(keyword))
+        : allCans;
+      renderCards(filtered);
+
+      // 통계
+      const fills = allCans.map(c => fillMap[c.id] ?? 0);
+      document.getElementById('stat-total').textContent = allCans.length;
+      document.getElementById('stat-danger').textContent = fills.filter(v => v >= 80).length;
+      document.getElementById('stat-warn').textContent   = fills.filter(v => v >= 60 && v < 80).length;
+      document.getElementById('stat-ok').textContent     = fills.filter(v => v < 60).length;
+    }
+
+    async function loadCans() {
+      try {
+        const canRes = await fetch('/api/trashcan');
+        allCans = await canRes.json();
+
+        // 각 쓰레기통 최신 적재율
+        await Promise.all(allCans.map(async (can) => {
+          try {
+            const res = await fetch(`/api/sensor/${can.id}`);
+            const logs = await res.json();
+            const latest = logs.length > 0 ? logs[logs.length - 1] : null;
+            fillMap[can.id] = latest ? Math.round(latest.fillLevel) : 0;
+          } catch {
+            fillMap[can.id] = 0;
+          }
+        }));
+
+        applyFilter();
+      } catch (err) {
+        console.error('로드 실패:', err);
+        document.getElementById('can-grid').innerHTML =
+          `<div class="can-empty">서버 연결에 실패했습니다.</div>`;
+      }
+    }
+
+    // ── 추가 모달 ──
+    function openAddModal() {
+      editingId = null;
+      document.getElementById('modal-title').textContent = '쓰레기통 추가';
+      document.getElementById('modal-submit-btn').textContent = '추가';
+      document.getElementById('f-locname').value = '';
+      document.getElementById('f-lat').value = '';
+      document.getElementById('f-lng').value = '';
+      document.getElementById('f-maxcapa').value = '';
+      document.getElementById('formModal').classList.add('open');
+    }
+
+    // ── 수정 모달 ──
+    function openEditModal(id) {
+      const can = allCans.find(c => c.id === id);
+      if (!can) return;
+      editingId = id;
+      document.getElementById('modal-title').textContent = '쓰레기통 수정';
+      document.getElementById('modal-submit-btn').textContent = '저장';
+      document.getElementById('f-locname').value = can.locName || '';
+      document.getElementById('f-lat').value = can.locLat || '';
+      document.getElementById('f-lng').value = can.locLng || '';
+      document.getElementById('f-maxcapa').value = can.maxCapa || '';
+      document.getElementById('formModal').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('formModal').classList.remove('open');
+    }
+
+    // ── 추가/수정 제출 ──
+    async function submitForm() {
+      const locName  = document.getElementById('f-locname').value.trim();
+      const locLat   = parseFloat(document.getElementById('f-lat').value);
+      const locLng   = parseFloat(document.getElementById('f-lng').value);
+      const maxCapa  = parseInt(document.getElementById('f-maxcapa').value);
+
+      if (!locName) { alert('위치명을 입력해주세요.'); return; }
+
+      const body = { locName, locLat, locLng, maxCapa };
+
+      try {
+        const url    = editingId ? `/api/trashcan/${editingId}` : '/api/trashcan';
+        const method = editingId ? 'PUT' : 'POST';
+        const res = await fetch(url, {
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        if (!res.ok) throw new Error('저장 실패');
+        closeModal();
+        loadCans();
+      } catch (e) {
+        alert('저장에 실패했습니다: ' + e.message);
+      }
+    }
+
+    // ── 삭제 모달 ──
+    function openDeleteModal(id, name) {
+      deletingId = id;
+      document.getElementById('delete-target-name').textContent = name;
+      document.getElementById('deleteModal').classList.add('open');
+    }
+
+    function closeDeleteModal() {
+      document.getElementById('deleteModal').classList.remove('open');
+      deletingId = null;
+    }
+
+    async function confirmDelete() {
+      if (!deletingId) return;
+      try {
+        const res = await fetch(`/api/trashcan/${deletingId}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('삭제 실패');
+        closeDeleteModal();
+        loadCans();
+      } catch (e) {
+        alert('삭제에 실패했습니다: ' + e.message);
+      }
+    }
+
+    // ── 모바일 햄버거 ──
+    const dashHamburger = document.getElementById('dashHamburger');
+    const sideNav = document.querySelector('nav.side-nav');
+    function initMobileNav() {
+      if (window.innerWidth <= 768) { dashHamburger.style.display = 'flex'; }
+      else { dashHamburger.style.display = 'none'; sideNav.classList.remove('open'); dashHamburger.classList.remove('open'); }
+    }
+    dashHamburger.addEventListener('click', () => { dashHamburger.classList.toggle('open'); sideNav.classList.toggle('open'); });
+    initMobileNav();
+    window.addEventListener('resize', initMobileNav);
+
+    loadCans();
+    setInterval(loadCans, 30000);
+  </script>
+  <script>
+    (function() {
+      var script = document.createElement('script');
+      script.src = 'https://unpkg.com/lucide@latest/dist/umd/lucide.min.js';
+      script.onload = function() { lucide.createIcons(); };
+      document.head.appendChild(script);
+    })();
+  </script>
+  <script>
+    function logout() {
+      fetch('/api/auth/logout', { method: 'POST' })
+        .then(function() { window.location.href = '/login'; });
+    }
+  </script>
+</body>
+</html>
