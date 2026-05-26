@@ -1,4 +1,4 @@
-    :root {
+:root {
       --bg: #0d1117;
       --sidebar-bg: #0a0f14;
       --card: #161b22;
@@ -13,7 +13,6 @@
       --text: #e6edf3;
       --text-muted: #7d8590;
       --text-dim: #484f58;
-      --accent: #2ea86a;
     }
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -26,6 +25,7 @@
       border-right: 1px solid var(--border);
       display: flex; flex-direction: column;
       position: fixed; left: 0; top: 0; bottom: 0;
+      overflow-y: auto;
     }
     .sidebar-logo {
       padding: 28px 24px;
@@ -38,7 +38,7 @@
     .sidebar-logo h1 span { color: var(--green-light); }
     .sidebar-logo small { font-size: 11px; color: var(--text-muted); display: block; margin-top: 4px; }
 
-    nav.side-nav { padding: 20px 12px; flex: 1; }
+    nav.side-nav { padding: 20px 12px; flex: 1; overflow-y: auto; }
     .nav-group-label {
       font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
       text-transform: uppercase; color: var(--text-dim);
@@ -47,14 +47,17 @@
     .nav-item {
       display: flex; align-items: center; gap: 10px;
       padding: 10px 14px; border-radius: 8px;
-      font-size: 14px; color: var(--text-muted);
+      font-size: 14px; color: var(--text);
       cursor: pointer; text-decoration: none;
       transition: background 0.15s, color 0.15s;
       margin-bottom: 2px;
     }
-    .nav-item:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+    .nav-item:hover { background: rgba(255,255,255,0.07); color: var(--white, #fff); }
     .nav-item.active { background: rgba(46,168,106,0.15); color: var(--green-light); }
-    .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+    .nav-item .icon { font-size: 16px; width: 20px; text-align: center; display: flex; align-items: center; justify-content: center; }
+    .nav-item .icon svg { width: 16px; height: 16px; stroke: currentColor; }
+    .stat-card-icon { font-size: 18px; display: flex; align-items: center; }
+    .stat-card-icon svg { width: 18px; height: 18px; stroke: currentColor; }
 
     .sidebar-footer {
       padding: 20px 24px;
@@ -294,7 +297,7 @@
         background: var(--sidebar-bg); border-bottom: 1px solid var(--border);
         z-index: 199; padding: 12px;
       }
-      nav.side-nav.open { display: block; }
+      nav.side-nav.open { display: block; overflow-y: auto; max-height: calc(100vh - 53px); }
       .nav-group-label { margin: 12px 0 4px; }
       .nav-item { padding: 10px 14px; }
 
