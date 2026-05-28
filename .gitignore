@@ -23,3 +23,7 @@ Thumbs.db
 
 # Secret
 **/application.properties
+
+.env
+*.pkl
+*.csv

@@ -1,21 +1,38 @@
 """
 train_regression.py
-EcoLink - 회귀 모델 학습 스크립트
+EcoLink - 회귀 모델 학습 스크립트 (DB 연동 버전)
+MariaDB sensor_log + empty_history → RandomForestRegressor 학습 → regression_model.pkl 저장
 목표: 현재 상태에서 몇 시간 후에 80%에 도달하는지 예측
 """
 
 import pandas as pd
 import numpy as np
 import pickle
+import pymysql
 import os
+from dotenv import load_dotenv
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, r2_score
 from sklearn.preprocessing import StandardScaler
 
-DATA_DIR = "data"
+# ────────────────────────────────────────────
+# .env 파일 로드
+# ────────────────────────────────────────────
+load_dotenv()
+
+DB_CONFIG = {
+    "host": os.getenv("DB_HOST", "localhost"),
+    "port": int(os.getenv("DB_PORT", 3306)),
+    "user": os.getenv("DB_USER", "root"),
+    "password": os.getenv("DB_PASSWORD"),
+    "database": os.getenv("DB_NAME", "bingo"),
+    "charset": "utf8mb4"
+}
+
 MODEL_PATH = "regression_model.pkl"
 SCALER_PATH = "regression_scaler.pkl"
+FILL_THRESHOLD = 80.0
 
 FEATURE_COLS = [
     "fill_level",
@@ -24,28 +41,58 @@ FEATURE_COLS = [
     "hour_of_day",
     "battery_level"
 ]
-LABEL_COL = "hours_until_full"  # 몇 시간 후 80% 도달하는지
+LABEL_COL = "hours_until_full"
 
 
-def load_sensor_data() -> pd.DataFrame:
-    path = f"{DATA_DIR}/sensor_log.csv"
-    if not os.path.exists(path):
-        raise FileNotFoundError(
-            f"[오류] {path} 파일이 없습니다.\n"
-            "먼저 generate_mock_data.py를 실행해 주세요."
-        )
-    return pd.read_csv(path, parse_dates=["log_time"])
+def load_from_db() -> tuple:
+    """MariaDB에서 sensor_log, empty_history 데이터 로드"""
+    print("[EcoLink] DB 연결 중...")
+    conn = pymysql.connect(**DB_CONFIG)
+
+    sensor_df = pd.read_sql("""
+        SELECT s.id, s.can_id, s.fill_level, s.battery_level, s.log_time
+        FROM sensor_log s
+        ORDER BY s.can_id, s.log_time
+    """, conn, parse_dates=["log_time"])
+
+    empty_df = pd.read_sql("""
+        SELECT id, can_id, before_level, after_level, emptied_at
+        FROM empty_history
+        ORDER BY can_id, emptied_at
+    """, conn, parse_dates=["emptied_at"])
+
+    conn.close()
+
+    print(f"  → sensor_log: {len(sensor_df)}개")
+    print(f"  → empty_history: {len(empty_df)}개")
+    return sensor_df, empty_df
 
 
-def build_regression_features(sensor_df: pd.DataFrame) -> pd.DataFrame:
-    """
-    sensor_log 데이터에서 회귀 모델용 Feature와 Label 생성
+def get_hours_since_empty(can_id: int, current_time, empty_df: pd.DataFrame) -> float:
+    """마지막 비움 이후 경과 시간 계산"""
+    past = empty_df[
+        (empty_df["can_id"] == can_id) &
+        (empty_df["emptied_at"] < current_time)
+    ]
+    if past.empty:
+        return 999.0
+    last_empty = past["emptied_at"].max()
+    return round((current_time - last_empty).total_seconds() / 3600, 2)
 
-    Label: hours_until_full
-        - 현재 시점에서 몇 시간 후에 80%에 도달하는지
-        - 이미 80% 이상이면 0
-        - 앞으로도 80% 안 되면 999 (제외)
-    """
+
+def compute_fill_rate(can_data: pd.DataFrame, idx: int, window: int = 3) -> float:
+    """시간당 평균 증가 속도 계산"""
+    start = max(0, idx - window)
+    w = can_data.iloc[start:idx + 1]
+    if len(w) < 2:
+        return 0.0
+    delta = w["fill_level"].iloc[-1] - w["fill_level"].iloc[0]
+    return round(max(0, delta / (len(w) - 1)), 4)
+
+
+def build_regression_features(sensor_df: pd.DataFrame,
+                               empty_df: pd.DataFrame) -> pd.DataFrame:
+    """회귀 모델용 Feature + Label 생성"""
     records = []
 
     for can_id in sensor_df["can_id"].unique():
@@ -56,54 +103,32 @@ def build_regression_features(sensor_df: pd.DataFrame) -> pd.DataFrame:
             current_fill = row["fill_level"]
             current_time = row["log_time"]
 
-            # 현재 이미 포화 상태면 0
-            if current_fill >= 80:
+            if current_fill >= FILL_THRESHOLD:
                 hours_until_full = 0.0
             else:
-                # 이후 데이터에서 처음으로 80% 넘는 시점 찾기
-                future_data = can_data.iloc[i+1:]
-                full_rows = future_data[future_data["fill_level"] >= 80]
+                future_data = can_data.iloc[i + 1:]
+                full_rows = future_data[future_data["fill_level"] >= FILL_THRESHOLD]
 
                 if full_rows.empty:
-                    continue  # 80% 안 되는 경우 제외
+                    continue
 
                 full_time = full_rows.iloc[0]["log_time"]
                 hours_until_full = (full_time - current_time).total_seconds() / 3600
                 hours_until_full = round(hours_until_full, 2)
 
-                # 너무 먼 미래는 제외 (24시간 이상)
                 if hours_until_full > 24:
                     continue
 
-            # fill_rate 계산
-            start = max(0, i - 3)
-            window = can_data.iloc[start:i+1]
-            if len(window) >= 2:
-                delta_fill = window["fill_level"].iloc[-1] - window["fill_level"].iloc[0]
-                fill_rate = max(0, delta_fill / (len(window) - 1))
-            else:
-                fill_rate = 0.0
-
-            # hours_since_empty 계산
-            prev_data = can_data.iloc[:i]
-            empties = prev_data[prev_data["fill_level"] < prev_data["fill_level"].shift(1) - 30]
-            if empties.empty:
-                hours_since_empty = 999.0
-            else:
-                last_empty_time = empties.iloc[-1]["log_time"]
-                hours_since_empty = round(
-                    (current_time - last_empty_time).total_seconds() / 3600, 2
-                )
+            fill_rate = compute_fill_rate(can_data, i)
+            hours_since_empty = get_hours_since_empty(can_id, current_time, empty_df)
 
             records.append({
-                "can_id": can_id,
-                "log_time": current_time,
                 "fill_level": current_fill,
-                "fill_rate": round(fill_rate, 4),
+                "fill_rate": fill_rate,
                 "hours_since_empty": hours_since_empty,
                 "hour_of_day": current_time.hour,
                 "battery_level": row["battery_level"],
-                "hours_until_full": hours_until_full
+                LABEL_COL: hours_until_full
             })
 
     return pd.DataFrame(records)
@@ -130,11 +155,10 @@ def train(df: pd.DataFrame):
     model.fit(X_train_scaled, y_train)
 
     y_pred = model.predict(X_test_scaled)
-
     mae = mean_absolute_error(y_test, y_pred)
     r2 = r2_score(y_test, y_pred)
 
-    print("\n[평가 결과]")
+    print(f"\n[평가 결과]")
     print(f"  평균 오차 (MAE): {mae:.2f}시간")
     print(f"  R² 점수: {r2:.4f} (1.0에 가까울수록 정확)")
 
@@ -156,14 +180,14 @@ def save_model(model, scaler):
 
 
 def main():
-    print("[EcoLink] 센서 데이터 로드 중...")
-    sensor_df = load_sensor_data()
+    sensor_df, empty_df = load_from_db()
 
     print("[EcoLink] 회귀 Feature 생성 중...")
-    df = build_regression_features(sensor_df)
+    df = build_regression_features(sensor_df, empty_df)
 
-    os.makedirs(DATA_DIR, exist_ok=True)
-    df.to_csv(f"{DATA_DIR}/regression_features.csv", index=False, encoding="utf-8-sig")
+    if len(df) < 100:
+        print(f"[경고] 학습 데이터가 너무 적습니다: {len(df)}개 (최소 100개 필요)")
+        return
 
     print(f"[EcoLink] 학습 데이터: {len(df)}개 샘플")
 
