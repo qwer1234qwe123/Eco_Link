@@ -65,10 +65,10 @@
       var page = window.location.pathname;
       var restricted = ['/worker', '/trashcan'];
 
-      fetch('/api/auth/me')
+      fetch('/bingo/api/auth/me', { credentials: 'include' })
         .then(function(res) {
           if (!res.ok) {
-            window.location.replace('/login');
+            window.location.replace('/bingo/login');
             return null;
           }
           return res.json();
@@ -79,7 +79,7 @@
           // grade 5가 제한 페이지 직접 접근 시 차단
           if (user.grade === 5 && restricted.includes(page)) {
             alert('접근 권한이 없습니다.');
-            window.location.replace('/dashboard');
+            window.location.replace('/bingo/dashboard');
             return;
           }
 
@@ -95,7 +95,7 @@
 
           // grade 5: 제한 메뉴 클릭 시 알럿만
           if (user.grade === 5) {
-            document.querySelectorAll('a[href="/worker"], a[href="/trashcan"]').forEach(function(el) {
+            document.querySelectorAll('a[href="/bingo/worker"], a[href="/bingo/trashcan"]').forEach(function(el) {
               el.addEventListener('click', function(e) {
                 e.preventDefault();
                 alert('접근 권한이 없습니다.');
@@ -104,7 +104,7 @@
           }
         })
         .catch(function() {
-          window.location.replace('/login');
+          window.location.replace('/bingo/login');
         });
     })();
   </script>
@@ -119,35 +119,35 @@
     </button>
     <nav class="side-nav">
       <div class="nav-group-label">모니터링</div>
-      <a class="nav-item" href="/dashboard">
+      <a class="nav-item" href="/bingo/dashboard">
         <span class="icon"><i data-lucide="layout-dashboard"></i></span> 대시보드
       </a>
-      <a class="nav-item" href="/trashcan">
+      <a class="nav-item" href="/bingo/trashcan">
         <span class="icon"><i data-lucide="trash-2"></i></span> 쓰레기통 목록
       </a>
-      <a class="nav-item" href="/sensor-log">
+      <a class="nav-item" href="/bingo/sensor-log">
         <span class="icon"><i data-lucide="radio"></i></span> 센서 로그
       </a>
       <div class="nav-group-label">AI / 예측</div>
-      <a class="nav-item active" href="/prediction">
+      <a class="nav-item active" href="/bingo/prediction">
         <span class="icon"><i data-lucide="bot"></i></span> 예측 결과
       </a>
-      <a class="nav-item" href="/trend">
+      <a class="nav-item" href="/bingo/trend">
         <span class="icon"><i data-lucide="trending-up"></i></span> 적재율 추이
       </a>
       <div class="nav-group-label">수거 관리</div>
-      <a class="nav-item" href="/route">
+      <a class="nav-item" href="/bingo/route">
         <span class="icon"><i data-lucide="map"></i></span> 수거 경로
       </a>
-      <a class="nav-item" href="/collection-history">
+      <a class="nav-item" href="/bingo/collection-history">
         <span class="icon"><i data-lucide="clipboard-list"></i></span> 수거 기록
       </a>
-      <a class="nav-item" href="/worker">
+      <a class="nav-item" href="/bingo/worker">
         <span class="icon"><i data-lucide="hard-hat"></i></span> 작업자 관리
       </a>
     </nav>
     <div class="sidebar-footer">
-      <a href="/">← 소개 페이지로</a>
+      <a href="/bingo/">← 소개 페이지로</a>
       <a id="logout-btn" href="#" onclick="logout()" style="display:none;margin-top:8px;color:#ef4444;font-size:13px;text-decoration:none;">로그아웃</a>
     </div>
   </aside>
@@ -258,7 +258,7 @@
     async function loadPredictions() {
       document.getElementById('last-pred-time').textContent = '업데이트 중...';
       try {
-        const res = await fetch('/api/prediction/all');
+        const res = await fetch('/bingo/api/prediction/all', { credentials: 'include' });
         if (!res.ok) throw new Error('API 오류');
         const data = await res.json();
         const cards = data.map(p => ({
@@ -274,7 +274,7 @@
       } catch (err) {
         console.warn('AI 예측 API 미연동, fallback 실행:', err.message);
         try {
-          const canRes = await fetch('/api/trashcan');
+          const canRes = await fetch('/bingo/api/trashcan', { credentials: 'include' });
           const cans = await canRes.json();
           const cards = cans.map(can => ({
             canId: can.id,
@@ -318,8 +318,8 @@
   </script>
   <script>
     function logout() {
-      fetch('/api/auth/logout', { method: 'POST' })
-        .then(function() { window.location.href = '/login'; });
+      fetch('/bingo/api/auth/logout', { method: 'POST', credentials: 'include' })
+        .then(function() { window.location.href = '/bingo/login'; });
     }
   </script>
 </body>

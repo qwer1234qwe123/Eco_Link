@@ -47,14 +47,14 @@ document.querySelectorAll('.intro-card, .team-card, .flow-step').forEach(el => {
 // 대시보드 이동 (로그인 체크)
 async function goToDashboard() {
   try {
-    const res = await fetch('/api/auth/me');
+    const res = await fetch('/bingo/api/auth/me', { credentials: 'include' });
     if (res.ok) {
-      window.location.href = '/dashboard';
+      window.location.href = '/bingo/dashboard';
     } else {
-      window.location.href = '/login';
+      window.location.href = '/bingo/login';
     }
   } catch {
-    window.location.href = '/login';
+    window.location.href = '/bingo/login';
   }
 }
 
@@ -62,7 +62,7 @@ async function goToDashboard() {
 async function loadStats() {
   try {
     // 1. 쓰레기통 개수
-    const canRes = await fetch('/api/trashcan');
+    const canRes = await fetch('/bingo/api/trashcan', { credentials: 'include' });
     const cans = await canRes.json();
     const total = cans.length;
     document.getElementById('stat-cans').textContent = total;
@@ -71,7 +71,7 @@ async function loadStats() {
     let activeCount = 0;
     await Promise.all(cans.map(async (can) => {
       try {
-        const res = await fetch(`/api/sensor/${can.id}`);
+        const res = await fetch(`/bingo/api/sensor/${can.id}`, { credentials: 'include' });
         const logs = await res.json();
         if (logs.length > 0) activeCount++;
       } catch {}
@@ -84,7 +84,7 @@ async function loadStats() {
       const fills = [];
       await Promise.all(cans.map(async (can) => {
         try {
-          const res = await fetch(`/api/sensor/${can.id}`);
+          const res = await fetch(`/bingo/api/sensor/${can.id}`, { credentials: 'include' });
           const logs = await res.json();
           if (logs.length > 0) {
             const latest = logs[logs.length - 1];

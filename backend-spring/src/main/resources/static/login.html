@@ -250,7 +250,7 @@
     </div>
 
     <div style="text-align:center;margin-top:16px;">
-      <a href="/" style="font-size:13px;color:var(--text-muted);text-decoration:none;">← 소개 페이지로</a>
+      <a href="/bingo/" style="font-size:13px;color:var(--text-muted);text-decoration:none;">← 소개 페이지로</a>
     </div>
     <div class="login-footer">
       © 2026 EcoLink Team — 융합프로젝트
@@ -259,9 +259,9 @@
 
   <script>
     // 이미 로그인된 경우 대시보드로
-    fetch('/api/auth/me')
+    fetch('/bingo/api/auth/me', { credentials: 'include' })
       .then(res => {
-        if (res.ok) window.location.href = '/dashboard';
+        if (res.ok) window.location.href = '/bingo/dashboard';
       })
       .catch(() => {});
 
@@ -287,14 +287,14 @@
       errMsg.classList.remove('show');
 
       try {
-        const res = await fetch('/api/auth/login', {
+        const res = await fetch('/bingo/api/auth/login', { credentials: 'include',
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password })
         });
 
         if (res.ok) {
-          window.location.href = '/dashboard';
+          window.location.href = '/bingo/dashboard';
         } else {
           const data = await res.json();
           errMsg.textContent = data.message || '로그인에 실패했습니다.';

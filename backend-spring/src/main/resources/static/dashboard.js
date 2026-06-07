@@ -136,7 +136,7 @@ function updateStats(cans, predCount) {
 async function loadPredictions(cansWithSensor) {
   try {
     // Spring Boot API 호출 → 내부에서 FastAPI 호출
-    const predRes = await fetch('/api/prediction/all');
+    const predRes = await fetch('/bingo/api/prediction/all', { credentials: 'include' });
 
     if (!predRes.ok) throw new Error('예측 API 오류');
 
@@ -197,14 +197,14 @@ async function loadData() {
 
   try {
     // 1. 쓰레기통 목록 가져오기
-    const canRes = await fetch('/api/trashcan');
+    const canRes = await fetch('/bingo/api/trashcan', { credentials: 'include' });
     const canList = await canRes.json();
 
     // 2. 각 쓰레기통의 최신 센서값 가져오기
     const cansWithSensor = await Promise.all(
       canList.map(async (can) => {
         try {
-          const sensorRes = await fetch(`/api/sensor/${can.id}`);
+          const sensorRes = await fetch(`/bingo/api/sensor/${can.id}`, { credentials: 'include' });
           const sensorLogs = await sensorRes.json();
 
           const latest = sensorLogs.length > 0
@@ -222,7 +222,7 @@ async function loadData() {
     );
 
     // 3. 최근 센서 로그 전체 가져오기
-    const logRes = await fetch('/api/sensor');
+    const logRes = await fetch('/bingo/api/sensor', { credentials: 'include' });
     const allLogs = await logRes.json();
     const recentLogs = [...allLogs]
       .sort((a, b) => new Date(b.logTime) - new Date(a.logTime))

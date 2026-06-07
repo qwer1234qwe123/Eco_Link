@@ -14,7 +14,8 @@
 <body>
 
   <nav>
-    <div class="nav-logo">Bin<span>Go</span> <small style="font-size:13px;font-weight:400;color:var(--gray)">by EcoLink</small></div>
+    <div class="nav-logo">Bin<span>Go</span> <small style="font-size:13px;font-weight:400;color:var(--gray)">by EcoLink</small>
+    </div>
     <ul>
       <li><a href="#intro">시스템 소개</a></li>
       <li><a href="#flow">작동 방식</a></li>
@@ -24,7 +25,7 @@
     <button class="nav-hamburger" id="hamburger" aria-label="메뉴">
       <span></span><span></span><span></span>
     </button>
-  </nav>
+</nav>
   <div class="nav-mobile-menu" id="mobileMenu">
     <a href="#intro" class="mobile-link">시스템 소개</a>
     <a href="#flow" class="mobile-link">작동 방식</a>
@@ -37,7 +38,9 @@
     <div class="hero-bg"></div>
     <div class="hero-grid"></div>
     <div class="hero-content">
-      <div class="hero-badge">실시간 모니터링 운영 중</div>
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:0;">
+        <div class="hero-badge" style="white-space:nowrap;margin-bottom:0;">실시간 모니터링 운영 중</div>
+      </div>
       <h1>도시의 쓰레기통이<br><em>스스로 말합니다</em></h1>
       <p>EcoLink 팀이 만든 <strong>BinGo</strong>는 초음파 센서로 적재율을 실시간 수집하고,<br>AI가 포화 시점을 예측해 최적의 수거 경로를 안내합니다.</p>
       <div class="hero-buttons">
@@ -85,24 +88,16 @@
 
         <!-- 쓰레기통 1 — 수거 필요 (빨강) -->
         <g transform="translate(148, 248)" class="can-collect" style="transform-origin:0px 100px">
-          <!-- 그림자 -->
           <ellipse cx="0" cy="150" rx="32" ry="6" fill="rgba(0,0,0,0.06)"/>
-          <!-- 몸통 -->
           <rect x="-30" y="28" width="60" height="66" rx="7" fill="#ef4444"/>
           <rect x="-24" y="34" width="48" height="54" rx="5" fill="#dc2626"/>
-          <!-- 뚜껑 -->
           <rect x="-34" y="16" width="68" height="16" rx="5" fill="#b91c1c"/>
-          <!-- 손잡이 -->
           <rect x="-14" y="6" width="28" height="12" rx="6" fill="#b91c1c"/>
-          <!-- 적재율 바 -->
           <rect x="-18" y="42" width="36" height="10" rx="5" fill="rgba(255,255,255,0.15)"/>
           <rect x="-18" y="42" width="33" height="10" rx="5" fill="rgba(255,255,255,0.4)"/>
-          <!-- % 텍스트 -->
           <text x="0" y="68" text-anchor="middle" fill="white" font-size="11" font-family="sans-serif" font-weight="bold">92%</text>
-          <!-- 경고 뱃지 -->
           <rect x="-22" y="80" width="44" height="14" rx="7" fill="rgba(255,255,255,0.2)"/>
           <text x="0" y="91" text-anchor="middle" fill="white" font-size="9" font-family="sans-serif" font-weight="bold">수거 필요</text>
-          <!-- 경고 아이콘 -->
           <circle cx="0" cy="-6" r="12" fill="#ef4444" class="blink-dot"/>
           <text x="0" y="-1" text-anchor="middle" fill="white" font-size="14" font-family="sans-serif" font-weight="bold">!</text>
         </g>
@@ -138,13 +133,10 @@
         <!-- 중앙 대시보드 카드 -->
         <rect x="185" y="78" width="190" height="136" rx="14" fill="rgba(13,59,46,0.06)"/>
         <rect x="191" y="84" width="178" height="124" rx="10" fill="white" opacity="0.95"/>
-        <!-- 카드 헤더 -->
         <rect x="191" y="84" width="178" height="32" rx="10" fill="#0d3b2e"/>
         <rect x="191" y="100" width="178" height="16" fill="#0d3b2e"/>
         <text x="280" y="104" text-anchor="middle" fill="white" font-size="12" font-family="sans-serif" font-weight="bold">BinGo 대시보드</text>
-        <!-- LIVE 뱃지 -->
         <circle cx="340" cy="100" r="4" fill="#4dffa0" class="blink-dot2"/>
-        <!-- 카드 내용 -->
         <g transform="translate(207, 126)">
           <rect width="10" height="10" rx="3" fill="#ef4444"/>
           <text x="16" y="9" fill="#374151" font-size="11" font-family="sans-serif">수거 필요 <tspan font-weight="bold">1개</tspan></text>
@@ -153,16 +145,13 @@
           <rect y="36" width="10" height="10" rx="3" fill="#2eb87a"/>
           <text x="16" y="45" fill="#374151" font-size="11" font-family="sans-serif">정상 <tspan font-weight="bold">1개</tspan></text>
         </g>
-        <!-- AI 뱃지 -->
         <rect x="207" y="178" width="158" height="22" rx="6" fill="#0d3b2e"/>
         <text x="286" y="193" text-anchor="middle" fill="#4dffa0" font-size="11" font-family="sans-serif" font-weight="bold">🤖 AI 예측 운영 중</text>
 
-        <!-- 연결선 -->
         <line x1="215" y1="220" x2="175" y2="285" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="5,4" opacity="0.4" class="fade1"/>
         <line x1="280" y1="220" x2="280" y2="290" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5,4" opacity="0.4" class="fade2"/>
         <line x1="345" y1="220" x2="385" y2="292" stroke="#2eb87a" stroke-width="1.5" stroke-dasharray="5,4" opacity="0.4" class="fade3"/>
 
-        <!-- 위치 마커 -->
         <circle cx="148" cy="248" r="5" fill="#ef4444" opacity="0.8"/>
         <circle cx="280" cy="258" r="5" fill="#f59e0b" opacity="0.8"/>
         <circle cx="412" cy="263" r="5" fill="#2eb87a" opacity="0.8"/>
@@ -300,21 +289,61 @@
   </section>
 
   <footer>
-    <div class="logo">Bin<span>Go</span></div>
-    <p>© 2025 EcoLink Team — 융합프로젝트</p>
+  <div class="footer-left">
+    <div class="logo" style="margin-bottom:10px";>Bin<span>Go</span></div>
+    </div>
+
+  <div class="footer-center">
+    <img src="폴리텍.svg" alt="한국폴리텍대학" style="height:43px; margin-bottom:20px;opacity:0.75; filter:brightness(0) invert(1);">
+    <img src="학과.svg" alt="AI소프트웨어학과" style="height:25px; margin-bottom:-5px; opacity:0.75; filter:brightness(0) invert(1);">
+  </div>
+
+    <p>© 2026 EcoLink Team — 융합프로젝트</p>
   </footer>
+  <!-- <footer>
+  <div class="footer-left">
+    <div class="logo">Bin<span>Go</span></div>
+    <div class="footer-logos">
+      <img src="폴리텍.svg" alt="한국폴리텍대학" 
+           style="height:43px; opacity:0.75; filter:brightness(0) invert(1);">
+      <img src="학과.svg" alt="한국폴리텍대학" 
+           style="height:25px; opacity:0.75; filter:brightness(0) invert(1);">
+    </div>
+    </div>
+    <p>© 2025 EcoLink Team — 융합프로젝트</p>
+  </footer> -->
+
+  <!-- <footer>
+    <div class="footer-left">
+      <div class="logo">Bin<span>Go</span></div>
+      <img src="폴리텍.svg" alt="한국폴리텍대학" style="height:43px; margin-left:430px; margin-bottom:15px; opacity:0.75; filter:brightness(0) invert(1);">
+      <img src="학과.svg" alt="한국폴리텍대학" style="height:25px; margin-top:7px; margin-left:-5px; opacity:0.75; filter:brightness(0) invert(1);">
+    </div>
+    <p>© 2025 EcoLink Team — 융합프로젝트</p>
+  </footer> -->
+
+  <!-- <footer>
+    <div class="footer-left">
+      <div class="logo">Bin<span>Go</span></div>
+      <div style="display:flex; flex-direction:column; gap:2px; margin-left:50px;">
+      <img src="폴리텍.svg" alt="한국폴리텍대학" style="display:block; height:45px; opacity:0.75; filter:brightness(0) invert(1);">
+      <span style="color:rgba(255,255,255,0.4); font-size:13px; margin-left:45px;letter-spacing:0.5px;">AI소프트웨어학과</span>
+      </div>
+    </div>
+    <p>© 2025 EcoLink Team — 융합프로젝트</p>
+  </footer> -->
 
   <script>
 async function goToDashboard() {
   try {
-    const res = await fetch('/api/auth/me');
+    const res = await fetch('/bingo/api/auth/me', { credentials: 'include' });
     if (res.ok) {
-      window.location.href = '/dashboard';
+      window.location.href = '/bingo/dashboard';
     } else {
-      window.location.href = '/login';
+      window.location.href = '/bingo/login';
     }
   } catch {
-    window.location.href = '/login';
+    window.location.href = '/bingo/login';
   }
 }
 </script>

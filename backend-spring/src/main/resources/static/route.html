@@ -407,22 +407,22 @@
     (function() {
       var page = window.location.pathname;
       var restricted = ['/worker', '/trashcan'];
-      fetch('/api/auth/me')
-        .then(function(res) { if (!res.ok) { window.location.replace('/login'); return null; } return res.json(); })
+      fetch('/bingo/api/auth/me', { credentials: 'include' })
+        .then(function(res) { if (!res.ok) { window.location.replace('/bingo/login'); return null; } return res.json(); })
         .then(function(user) {
           if (!user) return;
-          if (user.grade === 5 && restricted.includes(page)) { alert('접근 권한이 없습니다.'); window.location.replace('/dashboard'); return; }
+          if (user.grade === 5 && restricted.includes(page)) { alert('접근 권한이 없습니다.'); window.location.replace('/bingo/dashboard'); return; }
           var logo = document.querySelector('.sidebar-logo small');
           if (logo) logo.textContent = user.username + ' (' + (user.grade === 1 ? '관리자' : '작업자') + ')';
           var logoutBtn = document.getElementById('logout-btn');
           if (logoutBtn) logoutBtn.style.display = 'block';
           if (user.grade === 5) {
-            document.querySelectorAll('a[href="/worker"], a[href="/trashcan"]').forEach(function(el) {
+            document.querySelectorAll('a[href="/bingo/worker"], a[href="/bingo/trashcan"]').forEach(function(el) {
               el.addEventListener('click', function(e) { e.preventDefault(); alert('접근 권한이 없습니다.'); });
             });
           }
         })
-        .catch(function() { window.location.replace('/login'); });
+        .catch(function() { window.location.replace('/bingo/login'); });
     })();
   </script>
 
@@ -488,19 +488,19 @@
     <button class="dash-hamburger" id="dashHamburger" aria-label="메뉴" style="display:none"><span></span><span></span><span></span></button>
     <nav class="side-nav">
       <div class="nav-group-label">모니터링</div>
-      <a class="nav-item" href="/dashboard"><span class="icon"><i data-lucide="layout-dashboard"></i></span> 대시보드</a>
-      <a class="nav-item" href="/trashcan"><span class="icon"><i data-lucide="trash-2"></i></span> 쓰레기통 목록</a>
-      <a class="nav-item" href="/sensor-log"><span class="icon"><i data-lucide="radio"></i></span> 센서 로그</a>
+      <a class="nav-item" href="/bingo/dashboard"><span class="icon"><i data-lucide="layout-dashboard"></i></span> 대시보드</a>
+      <a class="nav-item" href="/bingo/trashcan"><span class="icon"><i data-lucide="trash-2"></i></span> 쓰레기통 목록</a>
+      <a class="nav-item" href="/bingo/sensor-log"><span class="icon"><i data-lucide="radio"></i></span> 센서 로그</a>
       <div class="nav-group-label">AI / 예측</div>
-      <a class="nav-item" href="/prediction"><span class="icon"><i data-lucide="bot"></i></span> 예측 결과</a>
-      <a class="nav-item" href="/trend"><span class="icon"><i data-lucide="trending-up"></i></span> 적재율 추이</a>
+      <a class="nav-item" href="/bingo/prediction"><span class="icon"><i data-lucide="bot"></i></span> 예측 결과</a>
+      <a class="nav-item" href="/bingo/trend"><span class="icon"><i data-lucide="trending-up"></i></span> 적재율 추이</a>
       <div class="nav-group-label">수거 관리</div>
-      <a class="nav-item active" href="/route"><span class="icon"><i data-lucide="map"></i></span> 수거 경로</a>
-      <a class="nav-item" href="/collection-history"><span class="icon"><i data-lucide="clipboard-list"></i></span> 수거 기록</a>
-      <a class="nav-item" href="/worker"><span class="icon"><i data-lucide="hard-hat"></i></span> 작업자 관리</a>
+      <a class="nav-item active" href="/bingo/route"><span class="icon"><i data-lucide="map"></i></span> 수거 경로</a>
+      <a class="nav-item" href="/bingo/collection-history"><span class="icon"><i data-lucide="clipboard-list"></i></span> 수거 기록</a>
+      <a class="nav-item" href="/bingo/worker"><span class="icon"><i data-lucide="hard-hat"></i></span> 작업자 관리</a>
     </nav>
     <div class="sidebar-footer">
-      <a href="/">← 소개 페이지로</a>
+      <a href="/bingo/">← 소개 페이지로</a>
       <a id="logout-btn" href="#" onclick="logout()" style="display:none;margin-top:8px;color:#ef4444;font-size:13px;text-decoration:none;">로그아웃</a>
     </div>
   </aside>
@@ -689,9 +689,9 @@
         const origin = `${validCans[0].locLng},${validCans[0].locLat}`;
         const destination = `${validCans[validCans.length-1].locLng},${validCans[validCans.length-1].locLat}`;
         const waypoints = validCans.slice(1,-1).map(c => `${c.locLng},${c.locLat}`).join('|');
-        let url = `/api/route/directions?origin=${origin}&destination=${destination}`;
+        let url = `/bingo/api/route/directions?origin=${origin}&destination=${destination}`;
         if (waypoints) url += `&waypoints=${encodeURIComponent(waypoints)}`;
-        const res = await fetch(url); const data = await res.json();
+        const res = await fetch(url, { credentials: 'include', credentials: 'include' }); const data = await res.json();
         if (data.routes && data.routes.length > 0) {
           data.routes[0].sections.forEach(section => { section.roads.forEach(road => {
             const path = []; for (let i = 0; i < road.vertexes.length; i += 2) path.push(new kakao.maps.LatLng(road.vertexes[i+1], road.vertexes[i]));
@@ -761,9 +761,9 @@
         const origin = `${allPoints[0].locLng},${allPoints[0].locLat}`;
         const destination = `${allPoints[allPoints.length-1].locLng},${allPoints[allPoints.length-1].locLat}`;
         const waypoints = allPoints.slice(1,-1).map(c => `${c.locLng},${c.locLat}`).join('|');
-        let url = `/api/route/directions?origin=${origin}&destination=${destination}`;
+        let url = `/bingo/api/route/directions?origin=${origin}&destination=${destination}`;
         if (waypoints) url += `&waypoints=${encodeURIComponent(waypoints)}`;
-        const res = await fetch(url); const data = await res.json();
+        const res = await fetch(url, { credentials: 'include', credentials: 'include' }); const data = await res.json();
         if (data.routes && data.routes.length > 0) {
           const route = data.routes[0];
           [kakaoMap, navFsMap].forEach(m => {
@@ -1040,11 +1040,11 @@
 
     async function loadAll() {
       try {
-        const canRes = await fetch('/api/trashcan'); const cans = await canRes.json();
+        const canRes = await fetch('/bingo/api/trashcan', { credentials: 'include' }); const cans = await canRes.json();
         const results = await Promise.all(cans.map(async (can) => {
-          let fill = 0; try { const s = await fetch(`/api/sensor/${can.id}`); const logs = await s.json(); const latest = logs.length > 0 ? logs[logs.length-1] : null; fill = latest ? Math.round(latest.fillLevel) : 0; } catch {}
+          let fill = 0; try { const s = await fetch(`/bingo/api/sensor/${can.id}`, { credentials: 'include' }); const logs = await s.json(); const latest = logs.length > 0 ? logs[logs.length-1] : null; fill = latest ? Math.round(latest.fillLevel) : 0; } catch {}
           let needsCollection = fill >= 80, predictedStatus = fill >= 80 ? '즉시 수거 필요' : '정상', hoursUntilFull = null;
-          try { const p = await fetch(`/api/prediction/${can.id}`); const pred = await p.json(); needsCollection = pred.needs_collection ?? needsCollection; predictedStatus = pred.predicted_status ?? predictedStatus; hoursUntilFull = pred.hours_until_full ?? null; } catch {}
+          try { const p = await fetch(`/bingo/api/prediction/${can.id}`, { credentials: 'include' }); const pred = await p.json(); needsCollection = pred.needs_collection ?? needsCollection; predictedStatus = pred.predicted_status ?? predictedStatus; hoursUntilFull = pred.hours_until_full ?? null; } catch {}
           return { ...can, fill, needsCollection, predictedStatus, hoursUntilFull };
         }));
         allCans = results;
@@ -1073,7 +1073,7 @@
       });
     }
 
-    fetch('/api/config/kakao-key').then(r => r.json()).then(data => {
+    fetch('/bingo/api/config/kakao-key', { credentials: 'include' }).then(r => r.json()).then(data => {
       const s = document.createElement('script'); s.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${data.key}&autoload=false`; s.onload = initMap; document.head.appendChild(s);
     }).catch(() => { document.getElementById('map-loading').innerHTML = '<div style="color:#ef4444">지도 키를 불러오지 못했습니다.</div>'; });
 
@@ -1084,6 +1084,6 @@
     setInterval(loadAll, 30000);
   </script>
   <script>(function(){var s=document.createElement('script');s.src='https://unpkg.com/lucide@latest/dist/umd/lucide.min.js';s.onload=function(){lucide.createIcons();};document.head.appendChild(s);})();</script>
-  <script>function logout(){fetch('/api/auth/logout',{method:'POST'}).then(function(){window.location.href='/login';});}</script>
+  <script>function logout(){fetch('/bingo/api/auth/logout',{method:'POST',credentials:'include'}).then(function(){window.location.href='/bingo/login';});}</script>
 </body>
 </html>

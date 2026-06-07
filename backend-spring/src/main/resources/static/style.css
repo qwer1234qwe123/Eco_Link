@@ -290,8 +290,23 @@
 
     /* FOOTER */
     footer {
-      background: #0a1a14; padding: 40px 60px;
+      background: #0a1a14; padding: 25px 60px;
       display: flex; justify-content: space-between; align-items: center;
+      position: relative;
+    }
+    .footer-center {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: row;        /* column → row 로 변경 */
+      align-items: center;
+      gap: 12px;                  /* 두 이미지 사이 간격 */
+    }
+    .footer-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
     footer .logo {
       font-family: 'Noto Serif KR', serif;
@@ -422,13 +437,13 @@
       #cta h2 { font-size: 1.8rem; }
       #cta p { font-size: 14px; }
       .btn-neon { padding: 15px 36px; font-size: 14px; display: block; }
-
-      footer { flex-direction: column; gap: 10px; padding: 28px 20px; text-align: center; }
     }
-
     /* 소형 모바일 (≤400px) */
     @media (max-width: 400px) {
       #hero h1 { font-size: 1.9rem; }
       .team-grid { grid-template-columns: 1fr; }
       #stats { grid-template-columns: repeat(2, 1fr); gap: 16px; }
     }
+
+
+    
