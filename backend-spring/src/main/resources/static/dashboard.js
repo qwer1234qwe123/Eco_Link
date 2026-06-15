@@ -207,9 +207,8 @@ async function loadData() {
           const sensorRes = await fetch(`/bingo/api/sensor/${can.id}`, { credentials: 'include' });
           const sensorLogs = await sensorRes.json();
 
-          const latest = sensorLogs.length > 0
-            ? sensorLogs[sensorLogs.length - 1]
-            : null;
+          const sorted = [...sensorLogs].sort((a, b) => new Date(b.logTime) - new Date(a.logTime));
+          const latest = sorted.length > 0 ? sorted[0] : null;  
 
           const fill    = latest ? latest.fillLevel    : 0;
           const battery = latest ? latest.batteryLevel : 0;
